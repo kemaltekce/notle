@@ -1,8 +1,7 @@
 :root {
   font-family: 'Inter', sans-serif !important;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 400;
-
   color: rgba(34, 34, 34, 0.87);
   background-color: #f1f1f1;
 }
@@ -11,7 +10,6 @@ body {
   margin: 0;
   display: flex;
   place-items: center;
-  min-height: 85vh;
 }
 
 h1 {
