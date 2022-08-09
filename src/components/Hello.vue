@@ -15,7 +15,7 @@ defineProps({
 
   <h1 class="title">{{ msg }}</h1>
   <div class="subtitle">
-    <p>yet another note-taking app</p>
+    <p>yet another note-taking app.</p>
     <p>coming soonish...</p>
   </div>
 
@@ -28,15 +28,17 @@ defineProps({
   position: absolute;
   top: 25vh;
   color: #f1f1f1;
-  padding-left: 2rem;
+  padding-left: 2vh;
+  font-size: 5vh;
 }
 
 .subtitle {
   letter-spacing: 0.2em;
   position: absolute;
-  top: 40vh;
+  top: 42vh;
   color: #f1f1f1;
-  padding-left: 2rem;
+  padding-left: 2vh;
+  font-size: 1.5vh;
 }
 
 .semicolon {
