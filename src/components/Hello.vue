@@ -27,7 +27,7 @@ defineProps({
   letter-spacing: 0.3em;
   position: absolute;
   top: 25vh;
-  color: #f1f1f1;
+  color: #f7f7f7;
   padding-left: 2vh;
   font-size: 5vh;
 }
@@ -36,7 +36,7 @@ defineProps({
   letter-spacing: 0.2em;
   position: absolute;
   top: 42vh;
-  color: #f1f1f1;
+  color: #f7f7f7;
   padding-left: 2vh;
   font-size: 1.5vh;
 }
