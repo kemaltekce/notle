@@ -1,17 +1,42 @@
 <script setup>
+  import { computed, onMounted } from "vue"
+  import { useRouter, onBeforeRouteUpdate } from 'vue-router'
+
   const props = defineProps({
     id: String,
   })
+  const router = useRouter()
+
   // TODO create one source for data like a state
   let pages = [
     {id: '22f2', title: 'daily log.'},
     {id: '33d2', title: 'weekly log.'}
   ]
-  let currentPage = pages[pages.findIndex((x) => x.id === props.id)]
+
+  let currentPage = computed(() => {
+    return getPageById(props.id)
+  })
+
+  function getPageById(id) {
+    return pages[pages.findIndex((x) => x.id === id)] || null
+  }
+
+  function toNotFoundIfMissingPage(page) {
+    if (!page) {
+      router.push({name: 'NotFound'})
+    }
+  }
+
+  onMounted(() => {
+    toNotFoundIfMissingPage(currentPage.value)
+  })
+  onBeforeRouteUpdate((to, from) => {
+    toNotFoundIfMissingPage(getPageById(to.params.id))
+  })
 </script>
 
 <template>
-  <div>
+  <div v-if="currentPage">
     <svg class="semicolon" width="100" height="280" viewBox="0 0 100 280" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect width="100" height="100" fill="#383838"/>
       <rect y="110" width="100" height="100" fill="#383838"/>

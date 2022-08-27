@@ -1,14 +1,30 @@
 <script setup>
+  import { useRouter } from "vue-router";
   import Semicolon from '../components/Semicolon.vue'
+
+  const router = useRouter()
+
+  function goBack() {
+    router.go(-2)
+  }
+
+  function goNav() {
+    router.push({name: 'Nav'})
+  }
 </script>
 
 <template>
-  <Semicolon title='about.'></Semicolon>
+  <Semicolon title='404.'></Semicolon>
   <div class="subtitle">
-    <p>notle is yet another note-taking app.</p>
-    <p>a note-taking app that might not be for you.</p>
-    <p>it will have a very minimalistic design and strange features.</p>
-    <router-link :to="{ name: 'Nav' }">heyy.</router-link>
+    <div>
+      <p>page not found.</p>
+    </div>
+    <div>
+      <a @click="goBack">go back</a>
+    </div>
+    <div>
+      <a @click="goNav">go to nav</a>
+    </div>
   </div>
 </template>
 
@@ -24,15 +40,6 @@
     margin-top: 1vh;
   }
 
-  .title {
-    letter-spacing: 0.3em;
-    position: absolute;
-    top: 25vh;
-    color: #f7f7f7;
-    padding-left: 2vh;
-    font-size: 5vh;
-  }
-
   .subtitle {
     letter-spacing: 0.2em;
     position: absolute;
@@ -41,10 +48,8 @@
     padding-left: 2vh;
     font-size: 1.5vh;
     width: 28vh;
-  }
-
-  .semicolon {
-    height: 90vh;
-    width: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4vh;
   }
 </style>
