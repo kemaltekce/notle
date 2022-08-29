@@ -1,28 +1,21 @@
 <script setup>
-  import { computed, onMounted } from "vue"
+  import { computed, onMounted, inject } from "vue"
   import { useRouter, onBeforeRouteUpdate } from 'vue-router'
+
 
   const props = defineProps({
     id: String,
   })
   const router = useRouter()
-
-  // TODO create one source for data like a state
-  let pages = [
-    {id: '22f2', title: 'daily log.'},
-    {id: '33d2', title: 'weekly log.'}
-  ]
+  const page = inject('page')
 
   let currentPage = computed(() => {
-    return getPageById(props.id)
+    return page.getById(props.id)
   })
 
-  function getPageById(id) {
-    return pages[pages.findIndex((x) => x.id === id)] || null
-  }
-
   function toNotFoundIfMissingPage(page) {
-    if (!page) {
+    // TODO install lodash and use _.isEmpty(page)
+    if (Object.keys(page).length === 0) {
       router.push({name: 'NotFound'})
     }
   }
@@ -31,7 +24,7 @@
     toNotFoundIfMissingPage(currentPage.value)
   })
   onBeforeRouteUpdate((to, from) => {
-    toNotFoundIfMissingPage(getPageById(to.params.id))
+    toNotFoundIfMissingPage(page.getById(to.params.id))
   })
 </script>
 

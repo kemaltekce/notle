@@ -2,6 +2,7 @@
   import { useRouter } from "vue-router";
   import Semicolon from '../components/Semicolon.vue'
 
+
   const router = useRouter()
 
   function goBack() {

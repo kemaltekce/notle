@@ -2,6 +2,7 @@
   import { ref } from 'vue'
   import Semicolon from '../components/Semicolon.vue'
 
+
   var colorID = ref(0)
   var colors = ['#F7F7F7', '#FFF7EC', '#F5E3D9', '#ECF2FE', '#C9D8D8']
 

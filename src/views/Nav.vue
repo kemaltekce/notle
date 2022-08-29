@@ -1,10 +1,9 @@
 <script setup>
+  import { inject } from 'vue'
   import Semicolon from '../components/Semicolon.vue'
-  // TODO create one source for data like a state
-  let pages = [
-    {id: '22f2', title: 'daily log.'},
-    {id: '33d2', title: 'weekly log.'}
-  ]
+
+
+  const page = inject('page')
 </script>
 
 <template>
@@ -13,7 +12,7 @@
     <div>
       <router-link :to="{ name: 'Hello'}">notle.</router-link>
     </div>
-    <div v-for="page in pages" :key="page.id">
+    <div v-for="page in page.all" :key="page.id">
       <router-link :to="{ name: 'Page', params: { id: page.id} }">{{ page.title }}</router-link>
     </div>
     <div>
