@@ -1,5 +1,5 @@
 <script setup>
-  import { computed, onMounted, inject } from "vue"
+  import { computed, onBeforeMount, onMounted, inject } from "vue"
   import { useRouter, onBeforeRouteUpdate } from 'vue-router'
 
 
@@ -20,11 +20,16 @@
     }
   }
 
+  onBeforeMount(() => {
+    document.body.className = 'hello'
+  })
   onMounted(() => {
     toNotFoundIfMissingPage(currentPage.value)
+    page.setCurruntPageID(currentPage.value.id)
   })
   onBeforeRouteUpdate((to, from) => {
     toNotFoundIfMissingPage(page.getById(to.params.id))
+    page.setCurruntPageID(to.params.id)
   })
 </script>
 

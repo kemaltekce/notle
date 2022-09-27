@@ -11,6 +11,7 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "lodash": "^4.17.21",
     "vue": "^3.2.37",
     "vue-router": "^4.1.3"
   },

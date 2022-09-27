@@ -1,5 +1,5 @@
 <script setup>
-  import { ref } from 'vue'
+  import { ref, onBeforeMount } from 'vue'
   import Semicolon from '../components/Semicolon.vue'
 
 
@@ -17,6 +17,10 @@
     var root = document.documentElement
     root.style.backgroundColor = colors[colorID.value]
   }
+
+  onBeforeMount(() => {
+    document.body.className = 'hello'
+  })
 </script>
 
 <template>
