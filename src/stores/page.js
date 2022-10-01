@@ -40,7 +40,6 @@ function add() {
 
 function remove(id) {
   const index = _.findIndex(pages, {'id': id})
-  console.log(index)
   pages.splice(index, 1)
 }
 
