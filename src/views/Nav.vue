@@ -13,11 +13,18 @@
   const navPageElements = ref([])
   const button = ref(null)
   const keyActive = ref(false)
-  const displayModal = ref(false)
+  // varialbes for the modal
+  const displayModal = ref(null)
+  // variables for the delete div via touch
+  const moveTouch = ref(false)
   const deleteWidth = ref(0)
   const deleteWidthStart = ref(0)
   const deleteWidthCurrent = ref(0)
   const deletePageID = ref(null)
+  // variables for touch long press
+  var touchTimer;
+  const touchDuration = 1000;
+  const longTouch = ref(false)
 
 
   if (currentPageID.value) {
@@ -44,19 +51,120 @@
     document.removeEventListener('touchstart', removeHoveringByTouch)
   })
 
+  // hovering functions
   function hovering(pageID) {
     hoveringPageID.value = pageID
   }
 
+  function removeHovering() {
+    if (!hoveringPageID.value && currentPageID.value) {
+      page.setCurruntPageID(null)
+    }
+    hoveringPageID.value = null
+  }
+
   function removeHoveringByTouch(e) {
     if (e.target.id === 'app') {
-      if (!hoveringPageID.value && currentPageID.value) {
-        page.setCurruntPageID(null)
-      }
-      hoveringPageID.value = null
+      removeHovering()
     }
   }
 
+  // modal functions
+  function answerQuestion(answer) {
+    if (displayModal.value.title === 'delete file') {
+      if (answer === 'yes') {
+        page.remove(displayModal.value.pageID)
+        if (currentPageID.value === displayModal.value.pageID) {
+          page.setCurruntPageID(null)
+        }
+        hoveringPageID.value = null
+        displayModal.value = null
+      }
+      if (answer === 'no') {
+        displayModal.value = null
+      }
+    }
+  }
+
+  function getModalQuestionDeleteData(pageID) {
+    const index = _.findIndex(page.all, { 'id': pageID })
+    return {
+      'type': 'question',
+      'title': 'delete file',
+      'pageID': page.all[index].id,
+      'question': 'are you sure you want to delete “' + page.all[index].title + '”?'}
+  }
+
+  function getModalEditData(index) {
+    return {
+      'type': 'edit',
+      'title': page.all[index].title,
+      'pageID': page.all[index].id
+    }
+  }
+
+  // functions for activating delete via touch
+  function getOffsetXMobile(e) {
+    return e.targetTouches[0].pageX - e.target.getBoundingClientRect().left
+  }
+
+  function getWidthPercentage(e) {
+    return (e.target.offsetWidth - getOffsetXMobile(e)) / e.target.offsetWidth * 100
+  }
+
+  function activateDelete(e, pageID) {
+    if (touchTimer) {clearTimeout(touchTimer)}
+    // specify touch type so that touch end can run specific function
+    moveTouch.value = true
+    if (displayModal.value) {return}
+    if ((deletePageID.value !== pageID) || (deleteWidthStart.value > deleteWidthCurrent.value)) {
+      deleteWidthStart.value = getWidthPercentage(e)
+    }
+    deleteWidthCurrent.value = getWidthPercentage(e)
+    deleteWidth.value = deleteWidthCurrent.value - deleteWidthStart.value - 5
+    if (deleteWidth.value < 0) {
+      deleteWidth.value = 0}
+    deletePageID.value = pageID
+    if (deleteWidth.value > 40) {
+      displayModal.value = getModalQuestionDeleteData(pageID)
+      deactivateDelete()
+    }
+  }
+
+  function deactivateDelete() {
+    deleteWidth.value = 0
+    deletePageID.value = null
+  }
+
+  // functions for long touch and activating edit modal
+  function touchStart(pageID) {
+    const index = _.findIndex(page.all, { 'id': pageID })
+    touchTimer = setTimeout(() => {
+      longTouch.value = true
+      activateEditModal(index)
+    }, touchDuration);
+  }
+
+  function touchEnd(pageID) {
+    // stops short touches from firing the event
+    if (touchTimer) {
+      clearTimeout(touchTimer)
+    }
+    if (longTouch.value) {
+        longTouch.value = false
+    } else if (moveTouch.value) {
+        moveTouch.value = false
+        deactivateDelete()
+    } else {
+      router.push({ name: 'Page', params: { id: pageID} })
+    }
+  }
+
+  function activateEditModal(pageID) {
+    displayModal.value = getModalEditData(pageID)
+  }
+
+  // navigation functions
   function activateMouse() {
     // activate mouse events
     keyActive.value = false
@@ -78,50 +186,16 @@
     )
   }
 
-  function answerQuestion(answer) {
-    if (displayModal.value.title === 'delete file') {
-      if (answer === 'yes') {
-        page.remove(displayModal.value.pageID)
-        if (currentPageID.value === displayModal.value.pageID) {
-          page.setCurruntPageID(null)
-        }
-        hoveringPageID.value = null
-        displayModal.value = null
-      }
-      if (answer === 'no') {
-        displayModal.value = null
-      }
-    }
+  function moveUp(pageID) {
+    pagePosition.value = _.findIndex(page.all, { 'id': pageID })
+    if (pagePosition.value === 0) {return}
+    page.move(pagePosition.value, pagePosition.value - 1)
   }
 
-  function getOffsetXMobile(e) {
-    return e.targetTouches[0].pageX - e.target.getBoundingClientRect().left
-  }
-  function getWidthPercentage(e) {
-    return (e.target.offsetWidth - getOffsetXMobile(e)) / e.target.offsetWidth * 100
-  }
-  function activateDelete(e, pageID) {
-    if (displayModal.value) {return}
-    if ((deletePageID.value !== pageID) || (deleteWidthStart.value > deleteWidthCurrent.value)) {
-      deleteWidthStart.value = getWidthPercentage(e)
-    }
-    deleteWidthCurrent.value = getWidthPercentage(e)
-    deleteWidth.value = deleteWidthCurrent.value - deleteWidthStart.value - 5
-    if (deleteWidth.value < 0) {
-      deleteWidth.value = 0}
-    deletePageID.value = pageID
-    if (deleteWidth.value > 40) {
-      const index = _.findIndex(page.all, { 'id': pageID })
-      displayModal.value= {
-        'title': 'delete file',
-        'pageID': page.all[index].id,
-        'question': 'are you sure you want to delete “' + page.all[index].title + '”?'}
-      deactivateDelete()
-    }
-  }
-  function deactivateDelete() {
-    deleteWidth.value = 0
-    deletePageID.value = null
+  function moveDown(pageID) {
+    pagePosition.value = _.findIndex(page.all, { 'id': pageID })
+    if (pagePosition.value + 1 === page.all.length) {return}
+    page.move(pagePosition.value, pagePosition.value + 1)
   }
 
   function navigate(e) {
@@ -133,9 +207,35 @@
 
     // modal navigation
     if (displayModal.value) {
-      if (e.keyCode === 89) {answerQuestion('yes')}
-      if (e.keyCode === 78) {answerQuestion('no')}
-      return
+      // esc to close modal
+      if (e.keyCode === 27) {
+        displayModal.value = null
+        return
+      }
+      // navigate question modal
+      if (displayModal.value['type'] === 'question') {
+        // y key for yes
+        if (e.keyCode === 89) {answerQuestion('yes')}
+        // n key for no
+        if (e.keyCode === 78) {answerQuestion('no')}
+        return
+      }
+      // navigate edit modal
+      if (displayModal.value['type'] === 'edit') {
+        // d key for delete
+        if (e.keyCode === 68) {
+          displayModal.value = getModalQuestionDeleteData(displayModal.value['pageID'])
+        }
+        // up key for move up
+        if (e.keyCode === 38) {
+          moveUp(displayModal.value['pageID'])
+        }
+        // down key for move down
+        if (e.keyCode === 40) {
+          moveDown(displayModal.value['pageID'])
+        }
+        return
+      }
     }
 
     // arrow up or k key for moving focus up
@@ -228,10 +328,7 @@
 
     // esc to remove hovering
     if (e.keyCode === 27) {
-      if (!hoveringPageID.value && currentPageID.value) {
-        page.setCurruntPageID(null)
-      }
-      hoveringPageID.value = null
+      removeHovering()
     }
 
     // b to go back to current page
@@ -242,27 +339,32 @@
     // remove or d key to delete page
     if ((e.keyCode === 8) || (e.keyCode === 68)) {
       if (hoveringPageID.value && (hoveringPageID.value !== 'button')) {
-        const index = _.findIndex(page.all, { 'id': hoveringPageID.value })
-        displayModal.value= {
-          'title': 'delete file',
-          'pageID': page.all[index].id,
-          'question': 'are you sure you want to delete “' + page.all[index].title + '”?'}
+        displayModal.value = getModalQuestionDeleteData(hoveringPageID.value)
       }
     }
 
+    // activate edit modal via e key
+    if (e.keyCode === 69) {
+      if (hoveringPageID.value && (hoveringPageID.value !== 'button')) {
+        // TODO move find index into getmodaleditdata function
+        const index = _.findIndex(page.all, { 'id': hoveringPageID.value })
+        displayModal.value = getModalEditData(index)
+      }
+    }
   }
 </script>
 
 <template>
-  <div class="nav" :class='{"nav--mouse-inactive": keyActive}'>
+  <div class="nav" :class='{"nav--mouse-inactive": keyActive}' oncontextmenu="return false">
     <div class="nav__title">heyy.</div>
     <div tabindex="0" class="nav__page" v-for="(page, i) in page.all"
       :key="page.id"
       :ref="(el) => (navPageElements[i] = el)"
       @mouseover="hovering(page.id)"
       @mouseleave="hoveringPageID = !keyActive ? null : hoveringPageID"
+      @touchstart="touchStart(page.id)"
       @touchmove="activateDelete($event, page.id)"
-      @touchend="deactivateDelete"
+      @touchend="touchEnd(page.id)"
       :class='{"nav__page--hovering": hoveringPageID === page.id}'
       >
       <router-link class="nav__page__link"
@@ -284,10 +386,31 @@
     <div class="modal__card">
       <div class="modal__content">
         <div class="modal__content__title">{{ displayModal['title'] }}</div>
-        <div class="modal__content__question">{{ displayModal['question'] }}</div>
-        <div class="modal__content__buttons">
-          <button class="modal__content__buttons__button" @click="answerQuestion('yes')">yes (y)</button>
-          <button class="modal__content__buttons__button" @click="answerQuestion('no')">no (n)</button>
+        <!-- modal for questions -->
+        <div
+          class="modal__content__question"
+          v-if="displayModal['type'] === 'question'">{{ displayModal['question'] }}</div>
+        <div
+          class="modal__content__buttons"
+          v-if="displayModal['type'] === 'question'">
+          <button
+            class="modal__content__buttons__button"
+            @click="answerQuestion('yes')">yes (y)</button>
+          <button
+            class="modal__content__buttons__button"
+            @click="answerQuestion('no')">no (n)</button>
+        </div>
+        <!-- modal for editting -->
+        <div class="modal__content__options" v-if="displayModal['type'] === 'edit'">
+          <div
+            class="modal__content__options__option"
+            @click="displayModal = getModalQuestionDeleteData(displayModal['pageID'])">delete (d)</div>
+          <div
+            class="modal__content__options__option"
+            @click="moveUp(displayModal['pageID'])">move up (&uarr;)</div>
+          <div
+            class="modal__content__options__option"
+            @click="moveDown(displayModal['pageID'])">move down (&darr;)</div>
         </div>
       </div>
     </div>
@@ -307,14 +430,14 @@
 
   .nav__title {
     font-size: 3.5rem;
-    font-weight: 100;
+    font-weight: 300;
     padding: 3rem 0;
   }
 
   .nav__page {
     display: flex;
     font-size: 1.5rem;
-    font-weight: 100;
+    font-weight: 200;
     border-bottom: 1px solid #555555;
     outline: none;
     position: relative;
@@ -325,12 +448,9 @@
     top: 0;
     right: 0;
     height: 100%;
-    /* width: 0%; */
-    background-color: red;
-    opacity: 0.5;
+    background-color: #555555;
     z-index: 10;
     position: absolute;
-    /* translate: 100%; */
   }
 
   .nav__page__link {
@@ -350,7 +470,7 @@
   .button {
     flex: 1;
     font-size: 1.3rem;
-    font-weight: 100;
+    font-weight: 200;
     padding: 1.5rem 0;
     padding-left: 0.5rem;
     cursor: pointer;
@@ -401,13 +521,13 @@
     padding: 1.5rem 0.5rem;
     /* margin-bottom: 1.5rem; */
     font-size: 2.0rem;
-    font-weight: 100;
+    font-weight: 300;
     border-bottom: 1px solid #555555;
   }
 
   .modal__content__question {
     font-size: 1.3rem;
-    font-weight: 100;
+    font-weight: 200;
     padding: 1.5rem 0.5rem;
   }
 
@@ -427,7 +547,7 @@
     padding: 0.3rem 0;
     background-color: #F7F7F7;
     font-size: 1rem;
-    font-weight: 100;
+    font-weight: 200;
   }
 
   .modal__content__buttons__button:hover {
@@ -438,5 +558,38 @@
     .modal__content__buttons {
       flex-direction: column;
     }
+  }
+
+  /* .modal__content__options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 1.0rem 0rem;
+  }
+
+  .modal__content__options__option {
+    font-size: 1.3rem;
+    font-weight: 100;
+    padding: 0.5rem 0rem;
+    padding-left: 1rem;
+    border-radius: 0.3rem;
+    border: 1px solid #555555;
+  } */
+
+  .modal__content__options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 1.0rem 0rem;
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+  }
+
+  .modal__content__options__option {
+    font-size: 1.3rem;
+    font-weight: 200;
+    padding: 0.7rem 0rem;
+    padding-left: 1rem;
+    border-bottom: 1px solid #F7F7F7;
   }
 </style>
