@@ -34,7 +34,7 @@
 </script>
 
 <template>
-  <div v-if="currentPage">
+  <div class="container" v-if="currentPage">
     <svg class="semicolon" width="100" height="280" viewBox="0 0 100 280" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect width="100" height="100" fill="#383838"/>
       <rect y="110" width="100" height="100" fill="#383838"/>
@@ -49,6 +49,10 @@
 </template>
 
 <style scoped>
+  .container {
+    margin: 2rem 0rem;
+  }
+
   a {
     color: #555555;
     background-color: #f7f7f7;
@@ -66,7 +70,7 @@
     top: 3vh;
     color: #f7f7f7;
     padding-left: 2vh;
-    font-size: 5vh;
+    font-size: 4vh;
     width: 28vh;
   }
 

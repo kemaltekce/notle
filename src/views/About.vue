@@ -1,18 +1,31 @@
 <script setup>
+  import { onBeforeMount } from "vue"
   import Semicolon from '../components/Semicolon.vue'
+
+
+  onBeforeMount(() => {
+    document.body.className = 'hello'
+  })
 </script>
 
 <template>
-  <Semicolon title='about.'></Semicolon>
-  <div class="subtitle">
-    <p>notle is yet another note-taking app.</p>
-    <p>a note-taking app that might not be for you.</p>
-    <p>it will have a very minimalistic design and strange features.</p>
-    <router-link :to="{ name: 'Nav' }">heyy.</router-link>
+  <div class="container">
+    <Semicolon title='about.'></Semicolon>
+    <div class="subtitle">
+      <p>notle is yet another note-taking app.</p>
+      <p>a note-taking app that might not be for you.</p>
+      <p>it will have a very minimalistic design and strange features.</p>
+      <router-link :to="{ name: 'Nav' }">heyy.</router-link>
+    </div>
   </div>
+
 </template>
 
 <style scoped>
+  .container {
+    margin: 2rem 0rem;
+  }
+
   a {
     color: #555555;
     background-color: #f7f7f7;

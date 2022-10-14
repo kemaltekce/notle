@@ -15,21 +15,28 @@
 </script>
 
 <template>
-  <Semicolon title='404.'></Semicolon>
-  <div class="subtitle">
-    <div>
-      <p>page not found.</p>
-    </div>
-    <div>
-      <a @click="goBack">go back</a>
-    </div>
-    <div>
-      <a @click="goNav">go to nav</a>
+  <div class="container">
+    <Semicolon title='404.'></Semicolon>
+    <div class="subtitle">
+      <div>
+        <p>page not found.</p>
+      </div>
+      <div>
+        <a @click="goBack">go back</a>
+      </div>
+      <div>
+        <a @click="goNav">go to nav</a>
+      </div>
     </div>
   </div>
+
 </template>
 
 <style scoped>
+  .container {
+    margin: 2rem 0rem;
+  }
+
   a {
     color: #555555;
     background-color: #f7f7f7;

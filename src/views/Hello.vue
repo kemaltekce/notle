@@ -24,7 +24,7 @@
 </script>
 
 <template>
-  <div @click="changeColor">
+  <div class="container" @click="changeColor">
       <Semicolon title='notle.'></Semicolon>
 
     <div class="subtitle">
@@ -35,6 +35,10 @@
 </template>
 
 <style scoped>
+  .container {
+    margin: 2rem 0rem;
+  }
+
   .title {
     letter-spacing: 0.3em;
     position: absolute;

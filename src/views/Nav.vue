@@ -15,6 +15,7 @@
   const keyActive = ref(false)
   // varialbes for the modal
   const displayModal = ref(null)
+  const modal = ref(null)
   // variables for the delete div via touch
   const moveTouch = ref(false)
   const deleteWidth = ref(0)
@@ -25,6 +26,14 @@
   var touchTimer;
   const touchDuration = 1000;
   const longTouch = ref(false)
+  // styles
+  const theme = {
+    titleFontWeight: 300,  // 300, 900
+    pageFontWeight: 200,  // 200, 600
+    modalColor: '#F7F7F7',  // #F7F7F7 #C9D8D8 #E5D7FA
+    displayHeyyTitle: true,
+    name: '',
+  }
 
 
   if (currentPageID.value) {
@@ -100,6 +109,32 @@
       'type': 'edit',
       'title': page.all[index].title,
       'pageID': page.all[index].id
+    }
+  }
+
+  function getModalProTipsData() {
+    return {
+      'type': 'pro',
+      'title': 'pro tips',
+      'tips': [
+        // navigation
+        {'key': 'up / j', 'text': 'move highlight up'},
+        {'key': 'down / k', 'text': 'move highlight down'},
+        {'key': 'enter', 'text': 'open highlighted page'},
+        {'key': 'esc', 'text': 'remove highlighting / close modal'},
+        {'key': 'b', 'text': 'back to current page (highlighted)'},
+        {'key': 's', 'text': 'open settings page'},
+        // change
+        {'key': 'meta + up', 'text': 'move page up'},
+        {'key': 'meta + down', 'text': 'move page down'},
+        // modal
+        {'key': 'e', 'text': 'open edit options'},
+        {'key': 'd', 'text': 'delete page'},
+        {'key': 'p', 'text': 'open pro tips'},
+        // touch
+        {'key': 'hold touch', 'text': 'open edit options'},
+        {'key': 'swipe left', 'text': 'delete page'},
+      ]
     }
   }
 
@@ -236,6 +271,24 @@
         }
         return
       }
+      // navigate question modal
+      if (displayModal.value['type'] === 'pro') {
+        // scroll down with down arrow and j
+        if ((e.keyCode === 40) || (e.keyCode === 74)) {
+          modal.value.scrollTo(
+            {'left': modal.value.scrollLeft,
+            'top': modal.value.scrollTop + 50,
+            'behavior':'smooth'})
+        }
+        // scroll up with up arrow and k
+        if ((e.keyCode === 38) || (e.keyCode === 75)) {
+          modal.value.scrollTo(
+            {'left': modal.value.scrollLeft,
+            'top': modal.value.scrollTop - 50,
+            'behavior':'smooth'})
+        }
+        return
+      }
     }
 
     // arrow up or k key for moving focus up
@@ -351,12 +404,38 @@
         displayModal.value = getModalEditData(index)
       }
     }
+
+    // open pro tips on p key
+    if (e.keyCode === 80) {
+      displayModal.value = getModalProTipsData()
+    }
+
+    // open settings with s key
+    if (e.keyCode === 83) {
+      router.push({ name: 'Settings' })
+    }
   }
 </script>
 
 <template>
-  <div class="nav" :class='{"nav--mouse-inactive": keyActive}' oncontextmenu="return false">
-    <div class="nav__title">heyy.</div>
+  <div class="menu">
+    <div class="menu__title">notle.</div>
+    <div class="menu__items">
+      <div class="menu__items__item">
+        <router-link :to="{ name: 'Settings' }">set</router-link>
+      </div>
+      <div
+        class="menu__items__item"
+        @click="displayModal = getModalProTipsData()">pro</div>
+    </div>
+  </div>
+  <div
+    class="nav" :class='{"nav--mouse-inactive": keyActive}'
+    oncontextmenu="return false">
+    <div class="empty"></div>
+    <div class="nav__title" v-if="theme.displayHeyyTitle">
+      <div class="nav__title__name" v-if="theme.name">{{ theme.name }}</div>
+      heyy.</div>
     <div tabindex="0" class="nav__page" v-for="(page, i) in page.all"
       :key="page.id"
       :ref="(el) => (navPageElements[i] = el)"
@@ -372,7 +451,10 @@
         :class='{"nav__page__link--active": currentPageID === page.id}'>
           {{ page.title }}
       </router-link>
-      <div class="nav__page__delete" :style="{width: deletePageID === page.id ? deleteWidth + '%' : '0%'}"></div>
+      <div
+        class="nav__page__delete"
+        :style="{width: deletePageID === page.id ? deleteWidth + '%' : '0%'}">
+      </div>
     </div>
     <div class="button" ref="button" tabindex="0"
       :class='{"nav__page--hovering": hoveringPageID === "button"}'
@@ -383,13 +465,15 @@
   </div>
   <div class="modal" v-if="displayModal">
     <div class="modal__background" @click="displayModal = null"></div>
-    <div class="modal__card">
+    <div class="modal__card" ref="modal">
       <div class="modal__content">
         <div class="modal__content__title">{{ displayModal['title'] }}</div>
         <!-- modal for questions -->
         <div
           class="modal__content__question"
-          v-if="displayModal['type'] === 'question'">{{ displayModal['question'] }}</div>
+          v-if="displayModal['type'] === 'question'">
+            {{ displayModal['question'] }}
+        </div>
         <div
           class="modal__content__buttons"
           v-if="displayModal['type'] === 'question'">
@@ -401,16 +485,30 @@
             @click="answerQuestion('no')">no (n)</button>
         </div>
         <!-- modal for editting -->
-        <div class="modal__content__options" v-if="displayModal['type'] === 'edit'">
+        <div
+          class="modal__content__options"
+          v-if="displayModal['type'] === 'edit'">
           <div
             class="modal__content__options__option"
-            @click="displayModal = getModalQuestionDeleteData(displayModal['pageID'])">delete (d)</div>
+            @click="displayModal = getModalQuestionDeleteData(displayModal['pageID'])">
+              delete (d)
+          </div>
           <div
             class="modal__content__options__option"
             @click="moveUp(displayModal['pageID'])">move up (&uarr;)</div>
           <div
             class="modal__content__options__option"
             @click="moveDown(displayModal['pageID'])">move down (&darr;)</div>
+        </div>
+        <!-- modal for pro tips -->
+        <div
+          class="modal__content__options"
+          v-if="displayModal['type'] === 'pro'">
+          <div
+            v-for="tip in displayModal['tips']"
+            :key="tip.key"
+            class="modal__content__options__option"
+            ><span>{{ tip.key }} : </span>{{ tip.text }}</div>
         </div>
       </div>
     </div>
@@ -420,8 +518,11 @@
 <style scoped>
   .nav {
     max-width: 600px;
-    margin: 5rem auto;
-    padding: 0 2rem;
+    margin: 0rem auto;
+    padding: 0rem 2rem;
+    border-left: 1px solid #555555;
+    border-right: 1px solid #555555;
+    min-height: 100%;
   }
 
   .nav--mouse-inactive {
@@ -430,17 +531,23 @@
 
   .nav__title {
     font-size: 3.5rem;
-    font-weight: 300;
     padding: 3rem 0;
+    font-weight: v-bind('theme.titleFontWeight');
+  }
+
+  .nav__title__name {
+    font-size: 1rem;
+    font-weight: 300;
+    color: #888888;
   }
 
   .nav__page {
     display: flex;
     font-size: 1.5rem;
-    font-weight: 200;
     border-bottom: 1px solid #555555;
     outline: none;
     position: relative;
+    font-weight: v-bind('theme.pageFontWeight');
   }
 
   .nav__page__delete {
@@ -470,7 +577,7 @@
   .button {
     flex: 1;
     font-size: 1.3rem;
-    font-weight: 200;
+    font-weight: v-bind('theme.pageFontWeight');
     padding: 1.5rem 0;
     padding-left: 0.5rem;
     cursor: pointer;
@@ -492,6 +599,7 @@
     position: fixed;
     right: 0;
     top: 0;
+    z-index: 15;
   }
 
   .modal__card {
@@ -499,11 +607,14 @@
     bottom: 0px;
     left: 0px;
     width: 100%;
-    background-color: #F7F7F7;
     padding-bottom: 1.5rem;
     animation-name: scrollIn;
     animation-duration: 0.5s;
     border-radius: 0.7rem 0.7rem 0 0;
+    max-height: 50%;
+    overflow: auto;
+    z-index: 20;
+    background-color: v-bind('theme.modalColor');
   }
 
   @keyframes scrollIn {
@@ -521,8 +632,8 @@
     padding: 1.5rem 0.5rem;
     /* margin-bottom: 1.5rem; */
     font-size: 2.0rem;
-    font-weight: 300;
     border-bottom: 1px solid #555555;
+    font-weight: v-bind('theme.titleFontWeight');
   }
 
   .modal__content__question {
@@ -545,9 +656,9 @@
     display: flex;
     justify-content: center;
     padding: 0.3rem 0;
-    background-color: #F7F7F7;
     font-size: 1rem;
     font-weight: 200;
+    background-color: v-bind('theme.modalColor');
   }
 
   .modal__content__buttons__button:hover {
@@ -588,8 +699,44 @@
   .modal__content__options__option {
     font-size: 1.3rem;
     font-weight: 200;
-    padding: 0.7rem 0rem;
-    padding-left: 1rem;
-    border-bottom: 1px solid #F7F7F7;
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid v-bind('theme.modalColor');
   }
+
+  .modal__content__options__option span {
+    font-weight: 400;
+  }
+
+  .empty {
+    height: 6rem;
+  }
+
+  .menu {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    border-bottom: 1px solid #555555;
+    margin: 0rem -1rem;
+    /* padding: 0.5rem 0rem; */
+    position: fixed;
+    width: 100%;
+    background-color: #F7F7F7;
+    z-index: 5;
+  }
+
+  .menu__title {
+    padding: 0.5rem 1rem;
+  }
+
+  .menu__items {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .menu__items__item {
+    border-left: 1px solid #555555;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+  }
+
 </style>
