@@ -148,22 +148,35 @@
   }
 
   function activateDelete(e, pageID) {
-    if (touchTimer) {clearTimeout(touchTimer)}
-    // specify touch type so that touch end can run specific function
-    moveTouch.value = true
-    if (displayModal.value) {return}
     if ((deletePageID.value !== pageID) || (deleteWidthStart.value > deleteWidthCurrent.value)) {
       deleteWidthStart.value = getWidthPercentage(e)
     }
     deleteWidthCurrent.value = getWidthPercentage(e)
     deleteWidth.value = deleteWidthCurrent.value - deleteWidthStart.value - 5
+
+    // if delete is active don't allow scrolling
+    if (deleteWidth.value > 0) {e.preventDefault()}
+    // don't allow negative width
     if (deleteWidth.value < 0) {
       deleteWidth.value = 0}
+
     deletePageID.value = pageID
     if (deleteWidth.value > 40) {
       displayModal.value = getModalQuestionDeleteData(pageID)
       deactivateDelete()
     }
+  }
+
+  function touchMove(e, pageID) {
+    if (touchTimer) {clearTimeout(touchTimer)}
+    // specify touch type so that touch end can run specific function
+    moveTouch.value = true
+    // scrolling is happening don't activate delete
+    if (!e.cancelable) {return}
+    // modal is active, don't still activate delete
+    if (displayModal.value) {return}
+
+    activateDelete(e, pageID)
   }
 
   function deactivateDelete() {
@@ -442,7 +455,7 @@
       @mouseover="hovering(page.id)"
       @mouseleave="hoveringPageID = !keyActive ? null : hoveringPageID"
       @touchstart="touchStart(page.id)"
-      @touchmove="activateDelete($event, page.id)"
+      @touchmove="touchMove($event, page.id)"
       @touchend="touchEnd(page.id)"
       :class='{"nav__page--hovering": hoveringPageID === page.id}'
       >
@@ -548,6 +561,11 @@
     outline: none;
     position: relative;
     font-weight: v-bind('theme.pageFontWeight');
+    /* remove blue color during long touch on chrome */
+    -webkit-tap-highlight-color:  rgba(255, 255, 255, 0);
+    /* disable long touch dialog window on ios */
+    user-select: none;
+    -webkit-user-select: none !important;
   }
 
   .nav__page__delete {
@@ -658,6 +676,7 @@
     padding: 0.3rem 0;
     font-size: 1rem;
     font-weight: 200;
+    color:#555555;
     background-color: v-bind('theme.modalColor');
   }
 

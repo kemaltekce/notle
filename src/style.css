@@ -10,6 +10,7 @@ body {
   margin: 0;;
   overflow: scroll;
   height: 100vh;
+  -webkit-touch-callout: none !important;
 }
 
 body.hello {
