@@ -1,6 +1,7 @@
 import { readonly, reactive, ref } from "vue"
 import _ from 'lodash'
 import uuid from "../utils/uuid"
+import bullet from "./bullet"
 
 
 // state
@@ -36,6 +37,7 @@ function move(from, to) {
 function add() {
   const newPage = {'id': uuid(), title: 'heyy.'}
   pages.push(newPage)
+  bullet.addNewPage(newPage.id)
 }
 
 function remove(id) {

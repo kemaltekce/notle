@@ -726,10 +726,6 @@
     font-weight: 400;
   }
 
-  .empty {
-    height: 6rem;
-  }
-
   .menu {
     display: flex;
     flex-direction: row;

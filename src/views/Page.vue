@@ -1,6 +1,7 @@
 <script setup>
-  import { computed, onBeforeMount, onMounted, inject } from "vue"
+  import { computed, inject, onMounted } from "vue"
   import { useRouter, onBeforeRouteUpdate } from 'vue-router'
+  import Bullet from "../components/Bullet.vue"
 
 
   const props = defineProps({
@@ -8,9 +9,22 @@
   })
   const router = useRouter()
   const page = inject('page')
+  const bullet = inject('bullet')
 
   let currentPage = computed(() => {
     return page.getById(props.id)
+  })
+
+  let bullets = computed({
+    get() {
+        return JSON.parse(
+          JSON.stringify(bullet.getPageBullets(currentPage.value.id)))
+    },
+    set(value) {
+      bullet.updatePageBullets({
+        'page_id': currentPage.value.id,
+        'bullets': value})
+    }
   })
 
   function toNotFoundIfMissingPage(page) {
@@ -20,9 +34,6 @@
     }
   }
 
-  onBeforeMount(() => {
-    document.body.className = 'hello'
-  })
   onMounted(() => {
     toNotFoundIfMissingPage(currentPage.value)
     page.setCurruntPageID(currentPage.value.id)
@@ -31,61 +42,78 @@
     toNotFoundIfMissingPage(page.getById(to.params.id))
     page.setCurruntPageID(to.params.id)
   })
+
+  function updatePageBullets(newBullets) {
+    bullets.value = newBullets
+  }
+
 </script>
 
 <template>
-  <div class="container" v-if="currentPage">
-    <svg class="semicolon" width="100" height="280" viewBox="0 0 100 280" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="100" height="100" fill="#383838"/>
-      <rect y="110" width="100" height="100" fill="#383838"/>
-      <path d="M0 259.004C0 259.004 32.7643 255.244 43 240.004C49.9196 229.701 50 209.004 50 209.004C50 209.004 88 209.004 100 209.004C100 230.5 89.8164 245.909 72.5 261.004C50.5097 280.173 0 279.004 0 279.004V259.004Z" fill="#383838"/>
-    </svg>
-
-    <h1 class="title">{{ currentPage.title }}</h1>
-    <div class="subtitle">
+  <div class="menu">
+    <div class="menu__title">
       <router-link :to="{ name: 'Nav' }">heyy.</router-link>
     </div>
+    <div class="menu__title">
+      <router-link :to="{ name: 'Nav' }">notle.</router-link>
+    </div>
+    <div class="menu__items">
+      <div class="menu__items__item">set</div>
+      <div class="menu__items__item">pro</div>
+    </div>
+  </div>
+  <div class="page" oncontextmenu="return false">
+    <div class="empty"></div>
+    <div class="page__title" contenteditable="true">{{ currentPage.title }}</div>
+    <bullet
+      :bullets="bullets"
+      @change="updatePageBullets(bullets)"
+      @customChange="updatePageBullets(bullets)"/>
   </div>
 </template>
 
 <style scoped>
-  .container {
-    margin: 2rem 0rem;
+  .page {
+    max-width: 600px;
+    margin: 0rem auto;
+    padding: 0rem 2rem;
+    border-left: 1px solid #555555;
+    border-right: 1px solid #555555;
+    min-height: 100%;
+    overflow: hidden;
   }
 
-  a {
-    color: #555555;
-    background-color: #f7f7f7;
-    text-decoration: None;
-    padding: 0.5vh;
-    border-radius: 0.5vh;
-    text-align: center;
-    position: absolute;
-    margin-top: 1vh;
+  .page__title {
+    font-size: 3.5rem;
+    padding: 3rem 0;
+    font-weight: 300;
   }
 
-  .title {
-    letter-spacing: 0.3em;
-    position: absolute;
-    top: 3vh;
-    color: #f7f7f7;
-    padding-left: 2vh;
-    font-size: 4vh;
-    width: 28vh;
+  .menu {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    border-bottom: 1px solid #555555;
+    margin: 0rem -1rem;
+    /* padding: 0.5rem 0rem; */
+    position: fixed;
+    width: 100%;
+    background-color: #F7F7F7;
+    z-index: 5;
   }
 
-  .subtitle {
-    letter-spacing: 0.2em;
-    position: absolute;
-    top: 42vh;
-    color: #f7f7f7;
-    padding-left: 2vh;
-    font-size: 1.5vh;
-    width: 28vh;
+  .menu__title {
+    padding: 0.5rem 1rem;
   }
 
-  .semicolon {
-    height: 90vh;
-    width: auto;
+  .menu__items {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .menu__items__item {
+    border-left: 1px solid #555555;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
   }
 </style>
