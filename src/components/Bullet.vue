@@ -16,7 +16,7 @@
 
 
   function activateEditable(e) {
-     if (e.target.classList.contains('bullet__text')) {
+    if (e.target.classList.contains('bullet__text')) {
       e.target.setAttribute("contenteditable", true)
       e.target.focus()
     }
@@ -89,13 +89,13 @@
     item-key="id"
     :animation="100"
     :fallbackOnBody="false"
-    :swapThreshold="0.65"
+    :swapThreshold="0.85"
     :delay="1000"
+    :touchStartThreshold="20"
     :disabled="false"
     :move="move"
     @choose="highlightChosen"
     @unchoose="unhighlightedChosen"
-    @click="activateEditable"
     @start="addPlaceholderToInitialPlace"
     @end="removePlaceholder"
     >
@@ -104,7 +104,10 @@
         <div class="bullet__main">
           <div class="toggle" v-if="element.bullets.length > 0">&#8250;</div>
           <div class="bullet__type" v-if="element.style !== 'text'" v-html="bulletStyle[element.style]"></div>
-          <div class="bullet__text" @blur="deactivateEditable">{{ element.text }}</div>
+          <div
+            class="bullet__text"
+            @click="activateEditable"
+            @blur="deactivateEditable">{{ element.text }}</div>
         </div>
         <div class="bullet__toggle">
           <bullet :bullets="element.bullets" @change="$emit('customChange')"/>
@@ -121,6 +124,7 @@
     padding-left: 5px;
     display: flex;
     flex-direction: column;
+    font-size: 1.1rem;
   }
 
   .bullet__main {
@@ -136,6 +140,11 @@
   .bullet__text {
     flex: 1;
     outline: none;
+  }
+
+  .bullet__text:empty:not(:focus):before {
+    content: '...';
+    color: #55555550;
   }
 
   .bullet__toggle {
