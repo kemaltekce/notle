@@ -4,7 +4,9 @@
 
 
   const props = defineProps({
-    bullets: Array})
+    bullets: Array,
+    main: Boolean})
+  const emit = defineEmits(['customChange', 'updateText'])
 
   const persistentClone = ref(null)
   const clonesNextSibling = ref(null)
@@ -12,6 +14,7 @@
     'todo': '&#43;',
     'text': '',
     'note': '&#8211;',
+    'done': '&#215;',
   }
 
 
@@ -22,8 +25,9 @@
     }
   }
 
-  function deactivateEditable(e) {
+  function deactivateEditable(e, bulletID) {
     e.target.setAttribute("contenteditable", false)
+    emit('updateText', {bulletID: [bulletID], text: e.target.innerText})
   }
 
   function addPlaceholderToInitialPlace(e) {
@@ -78,6 +82,10 @@
   function unhighlightedChosen(e) {
     e.item.classList.remove('bullet--placeholder')
   }
+
+  function updateText(payload, bulletID) {
+    emit('updateText', {bulletID: [bulletID, ...payload.bulletID], text: payload.text})
+  }
 </script>
 
 <template>
@@ -89,7 +97,7 @@
     item-key="id"
     :animation="100"
     :fallbackOnBody="false"
-    :swapThreshold="0.85"
+    :swapThreshold="0.55"
     :delay="1000"
     :touchStartThreshold="20"
     :disabled="false"
@@ -100,17 +108,28 @@
     @end="removePlaceholder"
     >
     <template #item="{ element }">
-      <div class="bullet">
+      <div
+        class="bullet"
+        :class='{"bullet--bottom": main, "bullet--done": element.style === "done"}'>
         <div class="bullet__main">
-          <div class="toggle" v-if="element.bullets.length > 0">&#8250;</div>
-          <div class="bullet__type" v-if="element.style !== 'text'" v-html="bulletStyle[element.style]"></div>
+          <!-- <div class="toggle" v-if="element.bullets.length > 0">&#8250;</div> -->
+          <div
+            class="bullet__type"
+            v-if="element.style !== 'text'"
+            v-html="bulletStyle[element.style]"></div>
           <div
             class="bullet__text"
+            :class='{"bullet__text--done": element.style === "done"}'
             @click="activateEditable"
-            @blur="deactivateEditable">{{ element.text }}</div>
+            @blur="deactivateEditable($event, element.id)">{{ element.text }}</div>
         </div>
         <div class="bullet__toggle">
-          <bullet :bullets="element.bullets" @change="$emit('customChange')"/>
+          <bullet
+            :bullets="element.bullets"
+            :main="false"
+            @change="$emit('customChange')"
+            @updateText="updateText($event, element.id)"
+            />
         </div>
       </div>
     </template>
@@ -125,6 +144,16 @@
     display: flex;
     flex-direction: column;
     font-size: 1.1rem;
+    font-weight: 400;
+  }
+
+  .bullet--bottom {
+    border-bottom: 1px solid #55555550;
+    padding: 0.7rem 0rem;
+  }
+
+  .bullet--done {
+    color: #55555550;
   }
 
   .bullet__main {
@@ -145,6 +174,14 @@
   .bullet__text:empty:not(:focus):before {
     content: '...';
     color: #55555550;
+  }
+
+  .bullet__text--done {
+    text-decoration: line-through;
+  }
+
+  .bullet__type {
+    font-weight: 500;
   }
 
   .bullet__toggle {
@@ -180,6 +217,7 @@
     height: 5px;
     border-radius: 0.3rem;
     z-index: 100;
+    padding: 0;
   }
 
   /* old */

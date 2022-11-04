@@ -44,6 +44,13 @@ const page_bullets = reactive([
         text: "simple text",
         toggled: false,
         bullets: []
+      },
+      {
+        id: 'asdffjfk2done',
+        style: 'done',
+        text: "done task",
+        toggled: false,
+        bullets: []
       }
     ]
   },
@@ -129,8 +136,19 @@ function updatePageBullets(update) {
     })
 }
 
+function updateBulletText(pageID, bulletID, text) {
+  const index = _.findIndex(page_bullets, {'page_id': pageID})
+  var data = page_bullets[index]
+  for (const x of bulletID) {
+    const index = _.findIndex(data.bullets, {'id': x})
+    var data = data.bullets[index]
+  }
+  data.text = text
+}
+
 export default {
   getPageBullets,
   addNewPage,
   updatePageBullets,
+  updateBulletText,
 }

@@ -47,6 +47,10 @@
     bullets.value = newBullets
   }
 
+  function updateText(payload) {
+    bullet.updateBulletText(currentPage.value.id, payload.bulletID, payload.text)
+  }
+
 </script>
 
 <template>
@@ -67,8 +71,10 @@
     <div class="page__title" contenteditable="true">{{ currentPage.title }}</div>
     <bullet
       :bullets="bullets"
+      :main="true"
       @change="updatePageBullets(bullets)"
-      @customChange="updatePageBullets(bullets)"/>
+      @customChange="updatePageBullets(bullets)"
+      @updateText="updateText"/>
   </div>
 </template>
 
