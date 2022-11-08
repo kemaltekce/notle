@@ -48,7 +48,11 @@
   }
 
   function updateText(payload) {
-    bullet.updateBulletText(currentPage.value.id, payload.bulletID, payload.text)
+    bullet.updateBulletText(currentPage.value.id, payload.bulletIDs, payload.text)
+  }
+
+  function changeToggle(payload) {
+    bullet.changeBulletToggle(currentPage.value.id, payload.bulletIDs, payload.toggled)
   }
 
 </script>
@@ -74,7 +78,9 @@
       :main="true"
       @change="updatePageBullets(bullets)"
       @customChange="updatePageBullets(bullets)"
-      @updateText="updateText"/>
+      @updateText="updateText"
+      @changeToggle="changeToggle"
+      />
   </div>
 </template>
 

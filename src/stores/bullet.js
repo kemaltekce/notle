@@ -11,7 +11,7 @@ const page_bullets = reactive([
       {
         id: 'asdf2',
         style: 'todo',
-        text: "task oned",
+        text: "task one",
         toggled: true,
         bullets: [
           {
@@ -27,7 +27,7 @@ const page_bullets = reactive([
         id: 'asdf2334',
         style: 'todo',
         text: "task two",
-        toggled: true,
+        toggled: false,
         bullets: [
           {
             id: 'ddasdf2',
@@ -49,6 +49,27 @@ const page_bullets = reactive([
         id: 'asdffjfk2done',
         style: 'done',
         text: "done task",
+        toggled: false,
+        bullets: []
+      },
+      {
+        id: 'asdffjfk2done',
+        style: 'important',
+        text: "important task",
+        toggled: false,
+        bullets: []
+      },
+      {
+        id: 'asdffjfk2done',
+        style: 'migrate',
+        text: "migrated task",
+        toggled: false,
+        bullets: []
+      },
+      {
+        id: 'asdffjfk2done',
+        style: 'future',
+        text: "future task",
         toggled: false,
         bullets: []
       }
@@ -111,7 +132,6 @@ function getPageBullets(id) {
 }
 
 function addNewPage(id) {
-  console.log(id)
   const newPage = {
     'page_id': id,
     'bullets': [
@@ -136,14 +156,24 @@ function updatePageBullets(update) {
     })
 }
 
-function updateBulletText(pageID, bulletID, text) {
+function getBullet(pageID, bulletIDs) {
   const index = _.findIndex(page_bullets, {'page_id': pageID})
   var data = page_bullets[index]
-  for (const x of bulletID) {
+  for (const x of bulletIDs) {
     const index = _.findIndex(data.bullets, {'id': x})
     var data = data.bullets[index]
   }
-  data.text = text
+  return data
+}
+
+function updateBulletText(pageID, bulletIDs, text) {
+  const bullet = getBullet(pageID, bulletIDs)
+  bullet.text = text
+}
+
+function changeBulletToggle(pageID, bulletIDs, toggled) {
+  const bullet = getBullet(pageID, bulletIDs)
+  bullet.toggled = toggled
 }
 
 export default {
@@ -151,4 +181,5 @@ export default {
   addNewPage,
   updatePageBullets,
   updateBulletText,
+  changeBulletToggle,
 }

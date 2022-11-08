@@ -6,15 +6,18 @@
   const props = defineProps({
     bullets: Array,
     main: Boolean})
-  const emit = defineEmits(['customChange', 'updateText'])
+  const emit = defineEmits(['customChange', 'updateText', 'changeToggle'])
 
   const persistentClone = ref(null)
   const clonesNextSibling = ref(null)
   const bulletStyle = {
-    'todo': '&#43;',
-    'text': '',
-    'note': '&#8211;',
-    'done': '&#215;',
+    'text': {icon: '', crossed: false},
+    'todo': {icon: '&#x25CF;', crossed: false},
+    'important': {icon: '&#x25C6;', crossed: false},
+    'done': {icon: '&#215;', crossed: true},
+    'migrate': {icon: '&#xbb;', crossed: true},
+    'future': {icon: '&#xab', crossed: true},
+    'note': {icon: '&#8211;', crossed: false},
   }
 
 
@@ -27,7 +30,7 @@
 
   function deactivateEditable(e, bulletID) {
     e.target.setAttribute("contenteditable", false)
-    emit('updateText', {bulletID: [bulletID], text: e.target.innerText})
+    emit('updateText', {bulletIDs: [bulletID], text: e.target.innerText})
   }
 
   function addPlaceholderToInitialPlace(e) {
@@ -84,7 +87,15 @@
   }
 
   function updateText(payload, bulletID) {
-    emit('updateText', {bulletID: [bulletID, ...payload.bulletID], text: payload.text})
+    emit('updateText', {bulletIDs: [bulletID, ...payload.bulletIDs], text: payload.text})
+  }
+
+  function toggleBullet(bulletID, toggled) {
+    emit('changeToggle', {bulletIDs: [bulletID], toggled: !toggled})
+  }
+
+  function changeToggle(payload, bulletID) {
+    emit('changeToggle', {bulletIDs: [bulletID, ...payload.bulletIDs], toggled: payload.toggled})
   }
 </script>
 
@@ -110,25 +121,32 @@
     <template #item="{ element }">
       <div
         class="bullet"
-        :class='{"bullet--bottom": main, "bullet--done": element.style === "done"}'>
+        :class='{"bullet--bottom": main, "bullet--crossed": bulletStyle[element.style].crossed}'>
         <div class="bullet__main">
-          <!-- <div class="toggle" v-if="element.bullets.length > 0">&#8250;</div> -->
+          <div
+            class="toggle"
+            :class='{"toggle--rotated": element.toggled}'
+            v-if="element.bullets.length > 0"
+            @click="toggleBullet(element.id, element.toggled)">&#x25B8;</div>
           <div
             class="bullet__type"
             v-if="element.style !== 'text'"
-            v-html="bulletStyle[element.style]"></div>
+            v-html="bulletStyle[element.style].icon"></div>
           <div
             class="bullet__text"
-            :class='{"bullet__text--done": element.style === "done"}'
+            :class='{"bullet__text--done": bulletStyle[element.style].crossed}'
             @click="activateEditable"
-            @blur="deactivateEditable($event, element.id)">{{ element.text }}</div>
+            @blur="deactivateEditable($event, element.id)"
+            @keydown.meta.enter.prevent="toggleBullet(element.id, element.toggled)"
+            >{{ element.text }}</div>
         </div>
-        <div class="bullet__toggle">
+        <div class="bullet__toggle" v-if="element.toggled">
           <bullet
             :bullets="element.bullets"
             :main="false"
             @change="$emit('customChange')"
             @updateText="updateText($event, element.id)"
+            @changeToggle="changeToggle($event, element.id)"
             />
         </div>
       </div>
@@ -152,7 +170,7 @@
     padding: 0.7rem 0rem;
   }
 
-  .bullet--done {
+  .bullet--crossed {
     color: #55555550;
   }
 
@@ -196,7 +214,11 @@
     justify-content: center;
     padding: 0.3rem 0rem;
     transform: rotate(0deg);
-    /* color: #C9D8D8; */
+    color: #55555550;
+  }
+
+  .toggle--rotated {
+    transform: rotate(90deg);
   }
 
   /* drag and drop styles */
