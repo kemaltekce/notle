@@ -1,5 +1,5 @@
 <script setup>
-  import { computed, inject, onMounted } from "vue"
+  import { computed, inject, onMounted, ref } from "vue"
   import { useRouter, onBeforeRouteUpdate } from 'vue-router'
   import Bullet from "../components/Bullet.vue"
 
@@ -10,6 +10,7 @@
   const router = useRouter()
   const page = inject('page')
   const bullet = inject('bullet')
+  const bulletElement = ref(null)
 
   let currentPage = computed(() => {
     return page.getById(props.id)
@@ -55,6 +56,12 @@
     bullet.changeBulletToggle(currentPage.value.id, payload.bulletIDs, payload.toggled)
   }
 
+  async function addNewBulletToPage(payload) {
+    const newBulletID = await bullet.addNewBullet(currentPage.value.id, payload.bulletIDs)
+    const newBullet = bulletElement.value.CompleteBulletElements[newBulletID]
+    newBullet.setAttribute("contenteditable", true)
+    newBullet.focus()
+  }
 </script>
 
 <template>
@@ -76,11 +83,14 @@
     <bullet
       :bullets="bullets"
       :main="true"
+      ref="bulletElement"
       @change="updatePageBullets(bullets)"
       @customChange="updatePageBullets(bullets)"
       @updateText="updateText"
       @changeToggle="changeToggle"
+      @addNewBulletToPage="addNewBulletToPage"
       />
+      <div class="empty"></div>
   </div>
 </template>
 

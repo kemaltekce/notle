@@ -1,12 +1,13 @@
 <script setup>
-  import { ref } from "vue"
+  import { ref, defineExpose, computed } from "vue"
   import draggable from "vuedraggable";
 
 
   const props = defineProps({
     bullets: Array,
     main: Boolean})
-  const emit = defineEmits(['customChange', 'updateText', 'changeToggle'])
+  const emit = defineEmits([
+    'customChange', 'updateText', 'changeToggle', 'addNewBulletToPage'])
 
   const persistentClone = ref(null)
   const clonesNextSibling = ref(null)
@@ -19,6 +20,20 @@
     'future': {icon: '&#xab', crossed: true},
     'note': {icon: '&#8211;', crossed: false},
   }
+  const bulletElements = ref({})
+  const bulletChildElements = ref({})
+  let CompleteBulletElements = computed(() => {
+    let childElements = bulletChildElements.value
+    let listOfChildElements = {}
+    for (const x in childElements) {
+      if (childElements[x] !== null) {
+        listOfChildElements = {...listOfChildElements, ...childElements[x].CompleteBulletElements}
+      }
+    }
+    return {...bulletElements.value, ...listOfChildElements}
+  })
+
+  defineExpose({CompleteBulletElements})
 
 
   function activateEditable(e) {
@@ -97,6 +112,14 @@
   function changeToggle(payload, bulletID) {
     emit('changeToggle', {bulletIDs: [bulletID, ...payload.bulletIDs], toggled: payload.toggled})
   }
+
+  function addNewBullet(bulletID) {
+    emit('addNewBulletToPage', {bulletIDs: [bulletID]})
+  }
+
+  function addNewBulletToPage(payload, bulletID) {
+    emit('addNewBulletToPage', {bulletIDs: [bulletID, ...payload.bulletIDs]})
+  }
 </script>
 
 <template>
@@ -127,7 +150,9 @@
             class="toggle"
             :class='{"toggle--rotated": element.toggled}'
             v-if="element.bullets.length > 0"
-            @click="toggleBullet(element.id, element.toggled)">&#x25B8;</div>
+            @click="toggleBullet(element.id, element.toggled)">
+            &#x25B2;
+          </div>
           <div
             class="bullet__type"
             v-if="element.style !== 'text'"
@@ -135,8 +160,10 @@
           <div
             class="bullet__text"
             :class='{"bullet__text--done": bulletStyle[element.style].crossed}'
+            :ref="(el) => (bulletElements[element.id] = el)"
             @click="activateEditable"
             @blur="deactivateEditable($event, element.id)"
+            @keydown.enter.exact.prevent="addNewBullet(element.id)"
             @keydown.meta.enter.prevent="toggleBullet(element.id, element.toggled)"
             >{{ element.text }}</div>
         </div>
@@ -144,9 +171,11 @@
           <bullet
             :bullets="element.bullets"
             :main="false"
+            :ref="(el) => (bulletChildElements[element.id] = el)"
             @change="$emit('customChange')"
             @updateText="updateText($event, element.id)"
             @changeToggle="changeToggle($event, element.id)"
+            @addNewBulletToPage="addNewBulletToPage($event, element.id)"
             />
         </div>
       </div>
@@ -194,16 +223,19 @@
     color: #55555550;
   }
 
-  .bullet__text--done {
+  .bullet__text--done:not(:empty) {
     text-decoration: line-through;
   }
 
   .bullet__type {
     font-weight: 500;
+    width: 15px;
+    display: flex;
+    justify-content: center;
   }
 
   .bullet__toggle {
-    padding-left: 1rem
+    padding-left: 1rem;
   }
 
   .toggle {
@@ -212,13 +244,16 @@
     width: 16px;
     display: flex;
     justify-content: center;
-    padding: 0.3rem 0rem;
-    transform: rotate(0deg);
+    align-items: center;
+    height: 100%;
+    transform: rotate(90deg);
     color: #55555550;
+    font-size: 0.8rem;
+    cursor: pointer;
   }
 
   .toggle--rotated {
-    transform: rotate(90deg);
+    transform: rotate(180deg);
   }
 
   /* drag and drop styles */

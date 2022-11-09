@@ -15,11 +15,41 @@ const page_bullets = reactive([
         toggled: true,
         bullets: [
           {
-            id: 'ddasdf2',
+            id: 'ddasadsfdf2',
             style: 'note',
             text: "note one",
             toggled: false,
             bullets: []
+          },
+          {
+            id: 'ddasdf294n',
+            style: 'note',
+            text: "note one two",
+            toggled: true,
+            bullets: [
+              {
+                id: 'ddasdfdmeme2',
+                style: 'note',
+                text: "note one two one",
+                toggled: false,
+                bullets: []
+              }
+            ]
+          },
+          {
+            id: 'ddasdf03j3n2',
+            style: 'note',
+            text: "note one three",
+            toggled: false,
+            bullets: [
+              {
+                id: 'dfkmnddasdf2',
+                style: 'note',
+                text: "note one three one",
+                toggled: false,
+                bullets: []
+              }
+            ]
           }
         ]
       },
@@ -46,28 +76,28 @@ const page_bullets = reactive([
         bullets: []
       },
       {
-        id: 'asdffjfk2done',
+        id: 'asdffjfk2donutuzie',
         style: 'done',
         text: "done task",
         toggled: false,
         bullets: []
       },
       {
-        id: 'asdffjfk2done',
+        id: 'asdffjfk2dqewrone',
         style: 'important',
         text: "important task",
         toggled: false,
         bullets: []
       },
       {
-        id: 'asdffjfk2done',
+        id: 'asdffjfk2dfafbeone',
         style: 'migrate',
         text: "migrated task",
         toggled: false,
         bullets: []
       },
       {
-        id: 'asdffjfk2done',
+        id: 'asdffjfk2dondfae',
         style: 'future',
         text: "future task",
         toggled: false,
@@ -157,6 +187,7 @@ function updatePageBullets(update) {
 }
 
 function getBullet(pageID, bulletIDs) {
+  // bulletIDs list of nested bullet ids leading to final bullet. step by step
   const index = _.findIndex(page_bullets, {'page_id': pageID})
   var data = page_bullets[index]
   for (const x of bulletIDs) {
@@ -164,6 +195,18 @@ function getBullet(pageID, bulletIDs) {
     var data = data.bullets[index]
   }
   return data
+}
+
+function getBulletAndSiblings(pageID, bulletIDs) {
+  // bulletIDs list of nested bullet ids leading to final bullet. step by step
+  var index = _.findIndex(page_bullets, {'page_id': pageID})
+  var data = page_bullets
+  for (const x of bulletIDs) {
+    data = data[index]
+    index = _.findIndex(data.bullets, {'id': x})
+    var data = data.bullets
+  }
+  return {bulletIndex: index, bullets: data}
 }
 
 function updateBulletText(pageID, bulletIDs, text) {
@@ -176,10 +219,35 @@ function changeBulletToggle(pageID, bulletIDs, toggled) {
   bullet.toggled = toggled
 }
 
+function addNewBullet(pageID, bulletIDs) {
+  const bullet = getBullet(pageID, bulletIDs)
+  const newID = uuid()
+  if (bullet.toggled) {
+    bullet.bullets.splice(0, 0, {
+      id: newID,
+      style: bullet.style,
+      text: "",
+      toggled: false,
+      bullets: []
+    })
+  } else {
+    const bulletAndSiblings = getBulletAndSiblings(pageID, bulletIDs)
+    bulletAndSiblings.bullets.splice(bulletAndSiblings.bulletIndex + 1, 0, {
+      id: newID,
+      style: bulletAndSiblings.bullets[bulletAndSiblings.bulletIndex].style,
+      text: "",
+      toggled: false,
+      bullets: []
+    })
+  }
+  return newID
+}
+
 export default {
   getPageBullets,
   addNewPage,
   updatePageBullets,
   updateBulletText,
   changeBulletToggle,
+  addNewBullet,
 }
