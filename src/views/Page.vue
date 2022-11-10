@@ -62,6 +62,17 @@
     newBullet.setAttribute("contenteditable", true)
     newBullet.focus()
   }
+
+  function updatePageTitle(e) {
+    page.updateTitle(currentPage.value.id, e.target.innerText)
+  }
+
+  function focusOnfirstBullet() {
+    const firstBulletID = bullets.value[0].id
+    const firstBullet = bulletElement.value.CompleteBulletElements[firstBulletID]
+    firstBullet.setAttribute("contenteditable", true)
+    firstBullet.focus()
+  }
 </script>
 
 <template>
@@ -79,7 +90,12 @@
   </div>
   <div class="page" oncontextmenu="return false">
     <div class="empty"></div>
-    <div class="page__title" contenteditable="true">{{ currentPage.title }}</div>
+    <div
+      class="page__title" contenteditable="true"
+      @blur="updatePageTitle"
+      @keydown.enter.exact.prevent="focusOnfirstBullet"
+      @keydown.down.exact.prevent="focusOnfirstBullet"
+      >{{ currentPage.title }}</div>
     <bullet
       :bullets="bullets"
       :main="true"

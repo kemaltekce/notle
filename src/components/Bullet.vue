@@ -146,13 +146,13 @@
         class="bullet"
         :class='{"bullet--bottom": main, "bullet--crossed": bulletStyle[element.style].crossed}'>
         <div class="bullet__main">
-          <div
-            class="toggle"
+          <!-- <div
+            class="toggle_"
             :class='{"toggle--rotated": element.toggled}'
             v-if="element.bullets.length > 0"
             @click="toggleBullet(element.id, element.toggled)">
             &#x25B2;
-          </div>
+          </div> -->
           <div
             class="bullet__type"
             v-if="element.style !== 'text'"
@@ -166,6 +166,14 @@
             @keydown.enter.exact.prevent="addNewBullet(element.id)"
             @keydown.meta.enter.prevent="toggleBullet(element.id, element.toggled)"
             >{{ element.text }}</div>
+          <div
+            class="toggle"
+            v-if="element.bullets.length > 0"
+            @click="toggleBullet(element.id, element.toggled)"
+          >
+            <div v-if="element.toggled">&#8211;</div>
+            <div v-else>&#x203A;</div>
+          </div>
         </div>
         <div class="bullet__toggle" v-if="element.toggled">
           <bullet
@@ -238,7 +246,7 @@
     padding-left: 1rem;
   }
 
-  .toggle {
+  .toggle_ {
     position: absolute;
     left: -16px;
     width: 16px;
@@ -249,6 +257,14 @@
     transform: rotate(90deg);
     color: #55555550;
     font-size: 0.8rem;
+    cursor: pointer;
+  }
+
+  .toggle {
+    display: flex;
+    justify-content: center;
+    color:#55555550;
+    padding: 0.3rem;
     cursor: pointer;
   }
 

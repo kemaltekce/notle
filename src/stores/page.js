@@ -45,6 +45,11 @@ function remove(id) {
   pages.splice(index, 1)
 }
 
+function updateTitle(id, newTitle) {
+  const index = _.findIndex(pages, {'id': id})
+  pages[index].title = newTitle
+}
+
 export default {
   all: readonly(pages),
   getById,
@@ -53,4 +58,5 @@ export default {
   move,
   add,
   remove,
+  updateTitle,
 }
