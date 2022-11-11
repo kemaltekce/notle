@@ -275,14 +275,11 @@
   /* drag and drop styles */
 
   .sortable-ghost {
-    /* background-color: #C9D8D8 !important; */
     background-color: #555555 !important;
-    position: fixed;
     overflow: hidden;
   }
 
   .bullet--placeholder {
-    /* background-color: #C9D8D850 !important; */
     background-color: #55555550 !important;
     border-radius: 0.3rem;
   }
