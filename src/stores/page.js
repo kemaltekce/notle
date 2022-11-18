@@ -14,6 +14,14 @@ const pages = reactive([
 ])
 
 const currentPageID = ref(null)
+// add state for main editing bullet id to get access to editModeBulletID inside
+// the bullet component and the page view. Variable is mainly defined inside the bullet component.
+// But it has to be deactivated and set to null inside the page view.
+// Because the deactivatation is part of a event listener. Adding the event
+// listener to the bullet component caused the problem of adding multiple
+// listeners because the bullet component can be mounted multiple times to the
+// dom.
+const editModeBulletID = ref(null)
 
 // actions
 function getById(id) {
@@ -50,6 +58,10 @@ function updateTitle(id, newTitle) {
   pages[index].title = newTitle
 }
 
+function setEditModeBulletID(id) {
+  editModeBulletID.value = id
+}
+
 export default {
   all: readonly(pages),
   getById,
@@ -59,4 +71,6 @@ export default {
   add,
   remove,
   updateTitle,
+  editModeBulletID: readonly(editModeBulletID),
+  setEditModeBulletID,
 }

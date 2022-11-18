@@ -1,13 +1,26 @@
 <script setup>
-  import { ref, defineExpose, computed } from "vue"
+  import { ref, defineExpose, computed, onUpdated, inject} from "vue"
+  import _ from 'lodash'
   import draggable from "vuedraggable";
+
+  import Cmdbar from '../components/Cmdbar.vue'
+
+  import focus from "../utils/focus"
 
 
   const props = defineProps({
     bullets: Array,
     main: Boolean})
+  // inject page to get access to editModeBulletID. Variable is defined here.
+  // But it has to be deactivated and set to null inside the page view.
+  // Because the deactivatation is part of a event listener. Adding the event
+  // listener to the bullet component caused the problem of adding multiple
+  // listeners because the bullet component can be mounted multiple times to the
+  // dom.
+  const page = inject('page')
   const emit = defineEmits([
-    'customChange', 'updateText', 'changeToggle', 'addNewBulletToPage'])
+    'customChange', 'updateText', 'changeToggle', 'addNewBulletToPage',
+    'indentBulletToSibling', 'unindentBulletToParent'])
 
   const persistentClone = ref(null)
   const clonesNextSibling = ref(null)
@@ -35,12 +48,22 @@
 
   defineExpose({CompleteBulletElements})
 
+  onUpdated(() => {
+    // reset both variables to remove removed bullets
+    bulletElements.value = {}
+    bulletChildElements.value = {}
+  })
 
-  function activateEditable(e) {
+
+  function activateEditable(e, bulletID) {
     if (e.target.classList.contains('bullet__text')) {
-      e.target.setAttribute("contenteditable", true)
-      e.target.focus()
+      focus(e.target)
+      page.setEditModeBulletID(bulletID)
     }
+  }
+
+  function activateEditMode(bulletID) {
+    page.setEditModeBulletID(bulletID)
   }
 
   function deactivateEditable(e, bulletID) {
@@ -120,6 +143,65 @@
   function addNewBulletToPage(payload, bulletID) {
     emit('addNewBulletToPage', {bulletIDs: [bulletID, ...payload.bulletIDs]})
   }
+
+  function indentBullet(e, bulletID) {
+    const bulletIndex = _.findIndex(props.bullets, {'id': bulletID})
+    if (bulletIndex === 0) {
+      return
+    }
+    // event e only exists if function is called by keypresses.
+    // if function is called via click on cmd bar, bullet will be automatically
+    // blured and event e doesn't exist.
+    if (e) {
+      e.target.blur()
+    }
+    emit('indentBulletToSibling', {bulletIDs: [bulletID]})
+  }
+
+  function indentBulletToSibling(payload, bulletID) {
+    emit('indentBulletToSibling', {bulletIDs: [bulletID, ...payload.bulletIDs]})
+  }
+
+  function unindentBullet(e, bulletID) {
+    if (props.main) {
+      return
+    }
+    // event e only exists if function is called by keypresses.
+    // if function is called via click on cmd bar, bullet will be automatically
+    // blured and event e doesn't exist.
+    if (e) {
+      e.target.blur()
+    }
+    emit('unindentBulletToParent', {bulletIDs: [bulletID]})
+  }
+
+  function unindentBulletToParent(payload, bulletID) {
+    emit('unindentBulletToParent', {bulletIDs: [bulletID, ...payload.bulletIDs]})
+  }
+
+  function runCmd(payload, bulletID) {
+    if (payload.name === 'indent') {
+      const bulletIndex = _.findIndex(props.bullets, {'id': bulletID})
+      // if bullet can not be indented, do nothing. Bullet is frist bullet in
+      // list
+      if (bulletIndex === 0) {
+        // click on cmd bar blurs the bullet. Get focus back on the bullet
+        focus(CompleteBulletElements.value[bulletID])
+        return
+      }
+      indentBullet(null, bulletID)
+    }
+    // if bullet can not be unindented, because it is part of the main bullet
+    // list, do nothing
+    else if (payload.name === 'unindent') {
+      if (props.main) {
+        // click on cmd bar blurs the bullet. Get focus back on the bullet
+        focus(CompleteBulletElements.value[bulletID])
+        return
+      }
+      unindentBullet(null, bulletID)
+    }
+  }
 </script>
 
 <template>
@@ -146,13 +228,6 @@
         class="bullet"
         :class='{"bullet--bottom": main, "bullet--crossed": bulletStyle[element.style].crossed}'>
         <div class="bullet__main">
-          <!-- <div
-            class="toggle_"
-            :class='{"toggle--rotated": element.toggled}'
-            v-if="element.bullets.length > 0"
-            @click="toggleBullet(element.id, element.toggled)">
-            &#x25B2;
-          </div> -->
           <div
             class="bullet__type"
             v-if="element.style !== 'text'"
@@ -161,10 +236,13 @@
             class="bullet__text"
             :class='{"bullet__text--done": bulletStyle[element.style].crossed}'
             :ref="(el) => (bulletElements[element.id] = el)"
-            @click="activateEditable"
+            @click="activateEditable($event, element.id)"
+            @focus="activateEditMode(element.id)"
             @blur="deactivateEditable($event, element.id)"
             @keydown.enter.exact.prevent="addNewBullet(element.id)"
             @keydown.meta.enter.prevent="toggleBullet(element.id, element.toggled)"
+            @keydown.tab.exact.prevent="indentBullet($event, element.id)"
+            @keydown.shift.tab.exact.prevent="unindentBullet($event, element.id)"
             >{{ element.text }}</div>
           <div
             class="toggle"
@@ -184,8 +262,11 @@
             @updateText="updateText($event, element.id)"
             @changeToggle="changeToggle($event, element.id)"
             @addNewBulletToPage="addNewBulletToPage($event, element.id)"
+            @indentBulletToSibling="indentBulletToSibling($event, element.id)"
+            @unindentBulletToParent="unindentBulletToParent($event, element.id)"
             />
         </div>
+      <cmdbar v-if="page.editModeBulletID.value === element.id" @runCmd="runCmd($event, element.id)"/>
       </div>
     </template>
   </draggable>
@@ -289,19 +370,4 @@
     z-index: 100;
     padding: 0;
   }
-
-  /* old */
-
-  /* .dragArea {
-    outline: 1px dashed;
-    z-index: -10;
-  } */
-
-  /* .sortable-drag {
-    background-color: #ffffff00 !important;
-  }
-  .sortable-chosen {
-    background-color: #ffffff00;
-  } */
-
 </style>

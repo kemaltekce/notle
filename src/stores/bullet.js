@@ -209,6 +209,37 @@ function getBulletAndSiblings(pageID, bulletIDs) {
   return {bulletIndex: index, bullets: data}
 }
 
+function getBulletAndGrandparents(pageID, bulletIDs) {
+  // bulletIDs list of nested bullet ids leading to final bullet. step by step
+  // the last id is the edited bullet id
+  const bulletID = bulletIDs.slice(-1)[0]
+  // the second to last bullet id is the parent id of the edited bullet id
+  const parentBulletID = bulletIDs.slice(-2, -1)[0]
+  // remeining bullet ids are ids leading to the parent and edited bullet id
+  const remainingBulletIDs = bulletIDs.slice(0, -2)
+
+  var index = _.findIndex(page_bullets, {'page_id': pageID})
+  var data = page_bullets[index]
+
+  if (remainingBulletIDs.length > 0) {
+    // iterate through remaining bullet ids until you reach the grandparent
+    // bullet
+    for (const x of remainingBulletIDs) {
+      index = _.findIndex(data.bullets, {'id': x})
+      data = data.bullets[index]
+    }
+  }
+  const grandparent = data
+  const parentIndex = _.findIndex(data.bullets, {'id': parentBulletID})
+  const bulletIndex = _.findIndex(
+    data.bullets[parentIndex].bullets, {'id': bulletID})
+
+  return {
+    bulletIndex: bulletIndex,
+    parentIndex: parentIndex,
+    grandparent: grandparent}
+}
+
 function updateBulletText(pageID, bulletIDs, text) {
   const bullet = getBullet(pageID, bulletIDs)
   bullet.text = text
@@ -243,6 +274,32 @@ function addNewBullet(pageID, bulletIDs) {
   return newID
 }
 
+function indentBullet(pageID, bulletIDs) {
+  const {bulletIndex, bullets} = getBulletAndSiblings(pageID, bulletIDs)
+  const editedBullet = bullets[bulletIndex]
+  // add bullet into toggle
+  bullets[bulletIndex - 1].bullets.push(editedBullet)
+  // activate toggle
+  bullets[bulletIndex - 1].toggled = true
+  // remove bullet from original place
+  bullets.splice(bulletIndex, 1)
+  return editedBullet.id
+}
+
+function unindentBullet(pageID, bulletIDs) {
+  var {bulletIndex, parentIndex, grandparent} = getBulletAndGrandparents(pageID, bulletIDs)
+  const editedBullet = grandparent.bullets[parentIndex].bullets[bulletIndex]
+  // add bullet to parents from toggle
+  grandparent.bullets.splice(parentIndex + 1, 0, editedBullet)
+  // remove bullet form toggle
+  grandparent.bullets[parentIndex].bullets.splice(bulletIndex, 1)
+  // set toggle to false if parents bullets are empty
+  if (grandparent.bullets[parentIndex].bullets.length === 0) {
+    grandparent.bullets[parentIndex].toggled = false
+  }
+  return editedBullet.id
+}
+
 export default {
   getPageBullets,
   addNewPage,
@@ -250,4 +307,6 @@ export default {
   updateBulletText,
   changeBulletToggle,
   addNewBullet,
+  indentBullet,
+  unindentBullet,
 }

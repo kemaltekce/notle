@@ -1,7 +1,10 @@
 <script setup>
   import { computed, inject, onMounted, ref } from "vue"
   import { useRouter, onBeforeRouteUpdate } from 'vue-router'
+
   import Bullet from "../components/Bullet.vue"
+
+  import focus from "../utils/focus"
 
 
   const props = defineProps({
@@ -38,11 +41,21 @@
   onMounted(() => {
     toNotFoundIfMissingPage(currentPage.value)
     page.setCurruntPageID(currentPage.value.id)
+    document.addEventListener('mousedown', deactivateEditMode)
   })
   onBeforeRouteUpdate((to, from) => {
     toNotFoundIfMissingPage(page.getById(to.params.id))
     page.setCurruntPageID(to.params.id)
+    document.removeEventListener('mousedown', deactivateEditMode)
   })
+
+  function deactivateEditMode(e) {
+    // keep cmdbar active if it is clicked. Bullet is still being edited.
+    // Only close it if click on other area
+    if (!e.target.classList.contains('cmd')) {
+      page.setEditModeBulletID(null)
+    }
+  }
 
   function updatePageBullets(newBullets) {
     bullets.value = newBullets
@@ -59,8 +72,7 @@
   async function addNewBulletToPage(payload) {
     const newBulletID = await bullet.addNewBullet(currentPage.value.id, payload.bulletIDs)
     const newBullet = bulletElement.value.CompleteBulletElements[newBulletID]
-    newBullet.setAttribute("contenteditable", true)
-    newBullet.focus()
+    focus(newBullet)
   }
 
   function updatePageTitle(e) {
@@ -70,8 +82,19 @@
   function focusOnfirstBullet() {
     const firstBulletID = bullets.value[0].id
     const firstBullet = bulletElement.value.CompleteBulletElements[firstBulletID]
-    firstBullet.setAttribute("contenteditable", true)
-    firstBullet.focus()
+    focus(firstBullet)
+  }
+
+  async function indentBulletToSibling(payload) {
+    const indentedBulletID = await bullet.indentBullet(currentPage.value.id, payload.bulletIDs)
+    const indentedBullet = bulletElement.value.CompleteBulletElements[indentedBulletID]
+    focus(indentedBullet)
+  }
+
+  async function unindentBulletToParent(payload) {
+    const unindentedBulletID = await bullet.unindentBullet(currentPage.value.id, payload.bulletIDs)
+    const unindentedBullet = bulletElement.value.CompleteBulletElements[unindentedBulletID]
+    focus(unindentedBullet)
   }
 </script>
 
@@ -105,6 +128,8 @@
       @updateText="updateText"
       @changeToggle="changeToggle"
       @addNewBulletToPage="addNewBulletToPage"
+      @indentBulletToSibling="indentBulletToSibling"
+      @unindentBulletToParent="unindentBulletToParent"
       />
       <div class="empty"></div>
   </div>
