@@ -20,7 +20,8 @@
   const page = inject('page')
   const emit = defineEmits([
     'customChange', 'updateText', 'changeToggle', 'addNewBulletToPage',
-    'indentBulletToSibling', 'unindentBulletToParent'])
+    'indentBulletToSibling', 'unindentBulletToParent', 'removeBulletStyle',
+    'removeBullet'])
 
   const persistentClone = ref(null)
   const clonesNextSibling = ref(null)
@@ -202,6 +203,36 @@
       unindentBullet(null, bulletID)
     }
   }
+
+  function remove(e, bulletID, bulletStyle) {
+    if (window.getSelection()['anchorOffset'] > 0) {return}
+
+    // remove bullet style if it is not simple text. Change bullet style from
+    // current style to just text. Additionally, also update the text of the
+    // bullet
+    if (bulletStyle !== 'text') {
+      emit(
+        'removeBulletStyle', {bulletIDs: [bulletID], text: e.target.innerText})
+      return
+    }
+
+    // if bullet style is simple text and the bullet text is empty remove the
+    // bullet
+    if ((bulletStyle === 'text') & (e.target.innerText.length === 0)) {
+      emit('removeBullet', {bulletIDs: [bulletID]})
+      return
+    }
+  }
+
+  function removeBulletStyle(payload, bulletID) {
+    emit(
+      'removeBulletStyle',
+      {bulletIDs: [bulletID, ...payload.bulletIDs], text: payload.text})
+  }
+
+  function removeBullet(payload, bulletID) {
+    emit('removeBullet', {bulletIDs: [bulletID, ...payload.bulletIDs]})
+  }
 </script>
 
 <template>
@@ -243,6 +274,7 @@
             @keydown.meta.enter.prevent="toggleBullet(element.id, element.toggled)"
             @keydown.tab.exact.prevent="indentBullet($event, element.id)"
             @keydown.shift.tab.exact.prevent="unindentBullet($event, element.id)"
+            @keydown.delete.exact="remove($event, element.id, element.style)"
             >{{ element.text }}</div>
           <div
             class="toggle"
@@ -264,6 +296,8 @@
             @addNewBulletToPage="addNewBulletToPage($event, element.id)"
             @indentBulletToSibling="indentBulletToSibling($event, element.id)"
             @unindentBulletToParent="unindentBulletToParent($event, element.id)"
+            @removeBulletStyle="removeBulletStyle($event, element.id)"
+            @removeBullet="removeBullet($event, element.id)"
             />
         </div>
       <cmdbar v-if="page.editModeBulletID.value === element.id" @runCmd="runCmd($event, element.id)"/>

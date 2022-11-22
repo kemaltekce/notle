@@ -242,7 +242,12 @@ function getBulletAndGrandparents(pageID, bulletIDs) {
 
 function updateBulletText(pageID, bulletIDs, text) {
   const bullet = getBullet(pageID, bulletIDs)
-  bullet.text = text
+  // if bullet is deleted, blur is triggered. Blur also triggers the text update
+  // but the bullet doesn't exist anymore. So only update the text if bullet
+  // exists
+  if (bullet) {
+    bullet.text = text
+  }
 }
 
 function changeBulletToggle(pageID, bulletIDs, toggled) {
@@ -300,6 +305,71 @@ function unindentBullet(pageID, bulletIDs) {
   return editedBullet.id
 }
 
+function removeStyle(pageID, bulletIDs, text) {
+  const bullet = getBullet(pageID, bulletIDs)
+  bullet.style = 'text'
+  bullet.text = text
+}
+
+function remove(pageID, bulletIDs) {
+  // get and return previous active bullet id so that we can set focus onto it
+  // after removing the current bullet
+  let previousBulletID = getPreviousActiveBullet(pageID, bulletIDs)
+
+  // remove process
+  var { bullet, bulletIndex, siblings, parent } = getBulletAndParent(pageID, bulletIDs)
+  // before removing the bullet check if bullet has toggled bullets itself.
+  // if so move the child bullets to the bullets siblings
+  let index = 0
+  for (const x of bullet.bullets) {
+    index++
+    siblings.splice(bulletIndex + index, 0, x)
+  }
+  // remove bullet
+  siblings.splice(bulletIndex, 1)
+  // if bullet is last bullet in toggle. set toggle to false
+  if (parent.bullets.length === 0) {
+    parent.toggled = false
+  }
+
+  return previousBulletID
+}
+
+function getBulletAndParent(pageID, bulletIDs) {
+  var parent
+  var siblings
+  // bulletIDs list of nested bullet ids leading to final bullet. step by step
+  var index = _.findIndex(page_bullets, {'page_id': pageID})
+  var data = page_bullets[index]
+  for (const x of bulletIDs) {
+    index = _.findIndex(data.bullets, {'id': x})
+    parent = data
+    siblings = data.bullets
+    var data = data.bullets[index]
+  }
+  return {bullet: data, bulletIndex: index, siblings: siblings, parent: parent}
+}
+
+function getPreviousActiveBullet(pageID, bulletIDs) {
+  var { bullet, bulletIndex, siblings, parent } = getBulletAndParent(pageID, bulletIDs)
+  // if bullet is first child bullet, focus back onto the parent bullet
+  if (bulletIndex === 0) {
+    // but if bullet is first bullet on page focus on title of page
+    if (bulletIDs.length === 1) {
+      return 'title'
+    }
+    return parent.id
+  }
+  // if bullet is not first, then it has siblings to focus on. Focus on the
+  // previous bullet or onto its the last child if previous bullet has the
+  // toggle activated
+  let previousSibling = siblings[bulletIndex - 1]
+  while (previousSibling.toggled) {
+    previousSibling = previousSibling.bullets.at(-1)
+  }
+  return previousSibling.id
+}
+
 export default {
   getPageBullets,
   addNewPage,
@@ -309,4 +379,6 @@ export default {
   addNewBullet,
   indentBullet,
   unindentBullet,
+  remove,
+  removeStyle,
 }

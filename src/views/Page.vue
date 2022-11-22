@@ -14,6 +14,7 @@
   const page = inject('page')
   const bullet = inject('bullet')
   const bulletElement = ref(null)
+  const title = ref(null)
 
   let currentPage = computed(() => {
     return page.getById(props.id)
@@ -96,6 +97,20 @@
     const unindentedBullet = bulletElement.value.CompleteBulletElements[unindentedBulletID]
     focus(unindentedBullet)
   }
+
+  async function removeBulletStyle(payload) {
+    bullet.removeStyle(currentPage.value.id, payload.bulletIDs, payload.text)
+  }
+
+  async function removeBullet(payload) {
+    const previousBulletID = await bullet.remove(currentPage.value.id, payload.bulletIDs)
+    if (previousBulletID === 'title') {
+      title.value.focus()
+    } else {
+      const previousBullet = bulletElement.value.CompleteBulletElements[previousBulletID]
+      focus(previousBullet)
+    }
+  }
 </script>
 
 <template>
@@ -114,7 +129,7 @@
   <div class="page" oncontextmenu="return false">
     <div class="empty"></div>
     <div
-      class="page__title" contenteditable="true"
+      class="page__title" contenteditable="true" ref="title"
       @blur="updatePageTitle"
       @keydown.enter.exact.prevent="focusOnfirstBullet"
       @keydown.down.exact.prevent="focusOnfirstBullet"
@@ -130,6 +145,8 @@
       @addNewBulletToPage="addNewBulletToPage"
       @indentBulletToSibling="indentBulletToSibling"
       @unindentBulletToParent="unindentBulletToParent"
+      @removeBulletStyle="removeBulletStyle"
+      @removeBullet="removeBullet"
       />
       <div class="empty"></div>
   </div>

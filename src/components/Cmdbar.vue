@@ -5,8 +5,10 @@
   const emit = defineEmits(['runCmd'])
 
   const cmds = [
-    {'name': 'indent', 'icon': '&#x21A6'},
-    {'name': 'unindent', 'icon': '&#x21A4'},
+    // {'name': 'indent', 'icon': '&#x21A6'},
+    // {'name': 'unindent', 'icon': '&#x21A4'},
+    {'name': 'indent', 'icon': 'tab'},
+    {'name': 'unindent', 'icon': 'un-tab'},
   ]
 
   function runCmd(name) {
