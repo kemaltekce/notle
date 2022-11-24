@@ -5,10 +5,8 @@
   const emit = defineEmits(['runCmd'])
 
   const cmds = [
-    // {'name': 'indent', 'icon': '&#x21A6'},
-    // {'name': 'unindent', 'icon': '&#x21A4'},
-    {'name': 'indent', 'icon': 'tab'},
-    {'name': 'unindent', 'icon': 'un-tab'},
+    {'name': 'indent', 'icon': '&#x22A2'},
+    {'name': 'unindent', 'icon': '&#x22A3'},
   ]
 
   function runCmd(name) {
@@ -21,9 +19,13 @@
     <div
       v-for="cmd in cmds" :key="cmd.name"
       class="cmd"
-      v-html="cmd.icon"
       @click="runCmd(cmd.name)"
       >
+      <div class="cmd__text"
+        v-html="cmd.icon"
+        @click="runCmd(cmd.name)"
+        >
+      </div>
     </div>
   </div>
 </template>
@@ -40,12 +42,19 @@
     overflow: auto;
     color: #555555;
     z-index: 100;
+    min-height: 1.7rem;
   }
 
   .cmd {
+    border-right: 1px solid #555555;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .cmd__text {
     font-size: 1rem;
     padding: 2px 10px;
-    border-right: 1px solid #555555;
-    cursor: pointer;
+    margin: auto;
   }
 </style>

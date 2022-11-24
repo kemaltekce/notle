@@ -21,7 +21,8 @@
   const emit = defineEmits([
     'customChange', 'updateText', 'changeToggle', 'addNewBulletToPage',
     'indentBulletToSibling', 'unindentBulletToParent', 'removeBulletStyle',
-    'removeBullet'])
+    'removeBullet', 'moveUpToPreviousBullet', 'moveDownToNextBullet',
+    'moveUpToTitle'])
 
   const persistentClone = ref(null)
   const clonesNextSibling = ref(null)
@@ -233,6 +234,28 @@
   function removeBullet(payload, bulletID) {
     emit('removeBullet', {bulletIDs: [bulletID, ...payload.bulletIDs]})
   }
+
+  function moveUp(e, bulletID) {
+    const bulletIndex = _.findIndex(props.bullets, {'id': bulletID})
+    if ((bulletIndex === 0) && props.main) {
+      emit('moveUpToTitle')
+      return
+    }
+    emit('moveUpToPreviousBullet', {bulletIDs: [bulletID]})
+  }
+
+  function moveUpToPreviousBullet(payload, bulletID) {
+    emit('moveUpToPreviousBullet', {bulletIDs: [bulletID, ...payload.bulletIDs]})
+  }
+
+  function moveDown(e, bulletID) {
+    const bulletIndex = _.findIndex(props.bullets, {'id': bulletID})
+    emit('moveDownToNextBullet', {bulletIDs: [bulletID]})
+  }
+
+  function moveDownToNextBullet(payload, bulletID) {
+    emit('moveDownToNextBullet', {bulletIDs: [bulletID, ...payload.bulletIDs]})
+  }
 </script>
 
 <template>
@@ -275,6 +298,8 @@
             @keydown.tab.exact.prevent="indentBullet($event, element.id)"
             @keydown.shift.tab.exact.prevent="unindentBullet($event, element.id)"
             @keydown.delete.exact="remove($event, element.id, element.style)"
+            @keydown.up.exact="moveUp($event, element.id)"
+            @keydown.down.exact="moveDown($event, element.id)"
             >{{ element.text }}</div>
           <div
             class="toggle"
@@ -298,6 +323,8 @@
             @unindentBulletToParent="unindentBulletToParent($event, element.id)"
             @removeBulletStyle="removeBulletStyle($event, element.id)"
             @removeBullet="removeBullet($event, element.id)"
+            @moveUpToPreviousBullet="moveUpToPreviousBullet($event, element.id)"
+            @moveDownToNextBullet="moveDownToNextBullet($event, element.id)"
             />
         </div>
       <cmdbar v-if="page.editModeBulletID.value === element.id" @runCmd="runCmd($event, element.id)"/>

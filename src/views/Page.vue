@@ -53,7 +53,7 @@
   function deactivateEditMode(e) {
     // keep cmdbar active if it is clicked. Bullet is still being edited.
     // Only close it if click on other area
-    if (!e.target.classList.contains('cmd')) {
+    if ((!e.target.classList.contains('cmd__text')) && (!e.target.classList.contains('cmd'))) {
       page.setEditModeBulletID(null)
     }
   }
@@ -111,6 +111,26 @@
       focus(previousBullet)
     }
   }
+
+  function moveUpToTitle() {
+    title.value.focus()
+    page.setEditModeBulletID(null)
+  }
+
+  function moveUpToPreviousBullet(payload) {
+    const previousBulletID = bullet.getPreviousActiveBullet(currentPage.value.id, payload.bulletIDs)
+    const previousBullet = bulletElement.value.CompleteBulletElements[previousBulletID]
+    focus(previousBullet)
+  }
+
+  function moveDownToNextBullet(payload) {
+    const nextBulletID = bullet.getNextActiveBullet(currentPage.value.id, payload.bulletIDs)
+    const nextBullet = bulletElement.value.CompleteBulletElements[nextBulletID]
+    // next bullet might not exist and nextBullet might be null if end of page
+    if (nextBullet) {
+      focus(nextBullet)
+    }
+  }
 </script>
 
 <template>
@@ -147,6 +167,9 @@
       @unindentBulletToParent="unindentBulletToParent"
       @removeBulletStyle="removeBulletStyle"
       @removeBullet="removeBullet"
+      @moveUpToTitle="moveUpToTitle"
+      @moveUpToPreviousBullet="moveUpToPreviousBullet"
+      @moveDownToNextBullet="moveDownToNextBullet"
       />
       <div class="empty"></div>
   </div>
@@ -167,6 +190,7 @@
     font-size: 3.5rem;
     padding: 3rem 0;
     font-weight: 300;
+    outline: none;
   }
 
   .menu {

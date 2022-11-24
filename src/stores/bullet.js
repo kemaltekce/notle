@@ -370,6 +370,46 @@ function getPreviousActiveBullet(pageID, bulletIDs) {
   return previousSibling.id
 }
 
+function getNextActiveBullet(pageID, bulletIDs) {
+  var { bullet, bulletIndex, siblings, parent } = getBulletAndParent(
+    pageID, bulletIDs)
+
+  // if toggle active the next bullet is the bullet inside the toggle
+  if (bullet.toggled) {
+    return bullet.bullets[0].id
+  }
+
+  // at the end of page
+  if ((bulletIDs.length === 1) && (parent.bullets.length === (bulletIndex + 1))) {
+    return null
+  }
+
+  // if last bullet layer, the next bullet is the parents next sibling or even
+  // further back the layers
+  if ((bulletIndex + 1) === parent.bullets.length) {
+    var {bulletIndex, parentIndex, grandparent} = getBulletAndGrandparents(
+      pageID, bulletIDs)
+
+    // end while loop if grandparent has a next parent bullet
+    var remainingBulletIDs = bulletIDs
+    while (grandparent.bullets.length < (parentIndex + 2)) {
+      var remainingBulletIDs = remainingBulletIDs.slice(0, -1)
+      // if nothing remains the nested toggled bullet is the last bullet.
+      // and we are at the end of the page
+      if (remainingBulletIDs.length === 1) {
+        return null
+      }
+      var {bulletIndex, parentIndex, grandparent} = getBulletAndGrandparents(
+        pageID, remainingBulletIDs)
+    }
+    return grandparent.bullets[parentIndex + 1].id
+  }
+
+  // default is to return the id of the next sibling
+  const nextSibling = parent.bullets[bulletIndex + 1]
+  return nextSibling.id
+}
+
 export default {
   getPageBullets,
   addNewPage,
@@ -381,4 +421,6 @@ export default {
   unindentBullet,
   remove,
   removeStyle,
+  getPreviousActiveBullet,
+  getNextActiveBullet,
 }
