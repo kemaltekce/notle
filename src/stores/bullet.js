@@ -5,154 +5,154 @@ import uuid from "../utils/uuid"
 
 // state
 const page_bullets = reactive([
-  {
-    'page_id': '22f2',
-    'bullets': [
-      {
-        id: 'asdf2',
-        style: 'todo',
-        text: "task one",
-        toggled: true,
-        bullets: [
-          {
-            id: 'ddasadsfdf2',
-            style: 'note',
-            text: "note one",
-            toggled: false,
-            bullets: []
-          },
-          {
-            id: 'ddasdf294n',
-            style: 'note',
-            text: "note one two",
-            toggled: true,
-            bullets: [
-              {
-                id: 'ddasdfdmeme2',
-                style: 'note',
-                text: "note one two one",
-                toggled: false,
-                bullets: []
-              }
-            ]
-          },
-          {
-            id: 'ddasdf03j3n2',
-            style: 'note',
-            text: "note one three",
-            toggled: false,
-            bullets: [
-              {
-                id: 'dfkmnddasdf2',
-                style: 'note',
-                text: "note one three one",
-                toggled: false,
-                bullets: []
-              }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'asdf2334',
-        style: 'todo',
-        text: "task two",
-        toggled: false,
-        bullets: [
-          {
-            id: 'ddasdf2',
-            style: 'note',
-            text: "note two",
-            toggled: false,
-            bullets: []
-          }
-        ]
-      },
-      {
-        id: 'asdffjfk2',
-        style: 'text',
-        text: "simple text",
-        toggled: false,
-        bullets: []
-      },
-      {
-        id: 'asdffjfk2donutuzie',
-        style: 'done',
-        text: "done task",
-        toggled: false,
-        bullets: []
-      },
-      {
-        id: 'asdffjfk2dqewrone',
-        style: 'important',
-        text: "important task",
-        toggled: false,
-        bullets: []
-      },
-      {
-        id: 'asdffjfk2dfafbeone',
-        style: 'migrate',
-        text: "migrated task",
-        toggled: false,
-        bullets: []
-      },
-      {
-        id: 'asdffjfk2dondfae',
-        style: 'future',
-        text: "future task",
-        toggled: false,
-        bullets: []
-      }
-    ]
-  },
-  {
-    'page_id': '33d2',
-    'bullets': [
-      {
-        id: 'asdf2mmkj',
-        style: 'todo',
-        text: "",
-        toggled: false,
-        bullets: []
-      },
-    ]
-  },
-  {
-    'page_id': '44d2',
-    'bullets': [
-      {
-        id: 'asdfff2mmkj',
-        style: 'todo',
-        text: "",
-        toggled: false,
-        bullets: []
-      },
-    ]
-  },
-  {
-    'page_id': '55d2',
-    'bullets': [
-      {
-        id: 'asd4df2mmkj',
-        style: 'todo',
-        text: "",
-        toggled: false,
-        bullets: []
-      },
-    ]
-  },
-  {
-    'page_id': '66d2',
-    'bullets': [
-      {
-        id: 'asdf89mmkj',
-        style: 'todo',
-        text: "",
-        toggled: false,
-        bullets: []
-      },
-    ]
-  },
+  // {
+  //   'page_id': '22f2',
+  //   'bullets': [
+  //     {
+  //       id: 'asdf2',
+  //       style: 'todo',
+  //       text: "task one",
+  //       toggled: true,
+  //       bullets: [
+  //         {
+  //           id: 'ddasadsfdf2',
+  //           style: 'note',
+  //           text: "note one",
+  //           toggled: false,
+  //           bullets: []
+  //         },
+  //         {
+  //           id: 'ddasdf294n',
+  //           style: 'note',
+  //           text: "note one two",
+  //           toggled: true,
+  //           bullets: [
+  //             {
+  //               id: 'ddasdfdmeme2',
+  //               style: 'note',
+  //               text: "note one two one",
+  //               toggled: false,
+  //               bullets: []
+  //             }
+  //           ]
+  //         },
+  //         {
+  //           id: 'ddasdf03j3n2',
+  //           style: 'note',
+  //           text: "note one three",
+  //           toggled: false,
+  //           bullets: [
+  //             {
+  //               id: 'dfkmnddasdf2',
+  //               style: 'note',
+  //               text: "note one three one",
+  //               toggled: false,
+  //               bullets: []
+  //             }
+  //           ]
+  //         }
+  //       ]
+  //     },
+  //     {
+  //       id: 'asdf2334',
+  //       style: 'todo',
+  //       text: "task two",
+  //       toggled: false,
+  //       bullets: [
+  //         {
+  //           id: 'ddasdf2',
+  //           style: 'note',
+  //           text: "note two",
+  //           toggled: false,
+  //           bullets: []
+  //         }
+  //       ]
+  //     },
+  //     {
+  //       id: 'asdffjfk2',
+  //       style: 'text',
+  //       text: "simple text",
+  //       toggled: false,
+  //       bullets: []
+  //     },
+  //     {
+  //       id: 'asdffjfk2donutuzie',
+  //       style: 'done',
+  //       text: "done task",
+  //       toggled: false,
+  //       bullets: []
+  //     },
+  //     {
+  //       id: 'asdffjfk2dqewrone',
+  //       style: 'important',
+  //       text: "important task",
+  //       toggled: false,
+  //       bullets: []
+  //     },
+  //     {
+  //       id: 'asdffjfk2dfafbeone',
+  //       style: 'migrate',
+  //       text: "migrated task",
+  //       toggled: false,
+  //       bullets: []
+  //     },
+  //     {
+  //       id: 'asdffjfk2dondfae',
+  //       style: 'future',
+  //       text: "future task",
+  //       toggled: false,
+  //       bullets: []
+  //     }
+  //   ]
+  // },
+  // {
+  //   'page_id': '33d2',
+  //   'bullets': [
+  //     {
+  //       id: 'asdf2mmkj',
+  //       style: 'todo',
+  //       text: "",
+  //       toggled: false,
+  //       bullets: []
+  //     },
+  //   ]
+  // },
+  // {
+  //   'page_id': '44d2',
+  //   'bullets': [
+  //     {
+  //       id: 'asdfff2mmkj',
+  //       style: 'todo',
+  //       text: "",
+  //       toggled: false,
+  //       bullets: []
+  //     },
+  //   ]
+  // },
+  // {
+  //   'page_id': '55d2',
+  //   'bullets': [
+  //     {
+  //       id: 'asd4df2mmkj',
+  //       style: 'todo',
+  //       text: "",
+  //       toggled: false,
+  //       bullets: []
+  //     },
+  //   ]
+  // },
+  // {
+  //   'page_id': '66d2',
+  //   'bullets': [
+  //     {
+  //       id: 'asdf89mmkj',
+  //       style: 'todo',
+  //       text: "",
+  //       toggled: false,
+  //       bullets: []
+  //     },
+  //   ]
+  // },
 ])
 
 // actions

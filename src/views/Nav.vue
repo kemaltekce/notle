@@ -307,18 +307,20 @@
     // arrow up or k key for moving focus up
     if ((e.keyCode === 38) || (e.keyCode === 75)) {
       e.preventDefault()
+      if (hoveringPageID.value === 'button') {
+        // don't run code if meta key is pressed
+        if (e.metaKey || e.shiftKey) {return}
+        // don't run if no page exists
+        if (page.all.length === 0) {return}
+        pagePosition.value = page.all.length - 1
+        hovering(page.all[pagePosition.value].id)
+        window.scrollTo(0, document.body.scrollHeight)
+        return
+      }
       if ((!hoveringPageID.value) || (hoveringPageID.value === page.all[0].id)) {
         // don't run code if meta key is pressed
         if (e.metaKey || e.shiftKey) {return}
         hovering('button')
-        window.scrollTo(0, document.body.scrollHeight)
-        return
-      }
-      if (hoveringPageID.value === 'button') {
-        // don't run code if meta key is pressed
-        if (e.metaKey || e.shiftKey) {return}
-        pagePosition.value = page.all.length - 1
-        hovering(page.all[pagePosition.value].id)
         window.scrollTo(0, document.body.scrollHeight)
         return
       }
@@ -344,6 +346,11 @@
     // arrow down or j key for moving focus down
     if ((e.keyCode === 40) || (e.keyCode === 74)) {
       e.preventDefault()
+      if (page.all.length === 0) {
+        hovering('button')
+        window.scrollTo(0, document.body.scrollHeight)
+        return
+      }
       if ((!hoveringPageID.value) || (hoveringPageID.value == 'button')) {
         // don't run code if meta key is pressed
         if (e.metaKey || e.shiftKey) {return}
@@ -389,7 +396,9 @@
         window.scrollTo(0, document.body.scrollHeight)
         return
       }
-      router.push({ name: 'Page', params: { id: hoveringPageID.value} })
+      if (hoveringPageID.value) {
+        router.push({ name: 'Page', params: { id: hoveringPageID.value} })
+      }
     }
 
     // esc to remove hovering

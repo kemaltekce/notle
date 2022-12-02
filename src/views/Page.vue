@@ -1,10 +1,12 @@
 <script setup>
   import { computed, inject, onMounted, ref } from "vue"
-  import { useRouter, onBeforeRouteUpdate } from 'vue-router'
+  import { useRouter, onBeforeRouteUpdate, onBeforeRouteLeave } from 'vue-router'
 
   import Bullet from "../components/Bullet.vue"
 
   import focus from "../utils/focus"
+  import blur from "../utils/blur"
+  import setCaretToEnd from "../utils/setCaretToEnd"
 
 
   const props = defineProps({
@@ -43,11 +45,15 @@
     toNotFoundIfMissingPage(currentPage.value)
     page.setCurruntPageID(currentPage.value.id)
     document.addEventListener('mousedown', deactivateEditMode)
+    document.addEventListener('keydown', processKeyPress)
   })
   onBeforeRouteUpdate((to, from) => {
     toNotFoundIfMissingPage(page.getById(to.params.id))
     page.setCurruntPageID(to.params.id)
+  })
+  onBeforeRouteLeave(() => {
     document.removeEventListener('mousedown', deactivateEditMode)
+    document.removeEventListener('keydown', processKeyPress)
   })
 
   function deactivateEditMode(e) {
@@ -55,6 +61,44 @@
     // Only close it if click on other area
     if ((!e.target.classList.contains('cmd__text')) && (!e.target.classList.contains('cmd'))) {
       page.setEditModeBulletID(null)
+    }
+  }
+
+  function processKeyPress(e) {
+    // esc to close edit mode
+    if (e.keyCode === 27) {
+      if (e.target.classList.contains('page__title')) {
+        e.target.blur()
+        return
+      }
+      if (page.editModeBulletID.value) {
+        blur(bulletElement.value.CompleteBulletElements[page.editModeBulletID.value])
+        page.setEditModeBulletID(null)
+      }
+      return
+    }
+
+    // don't process key presses if in edit mode
+    if (page.editModeBulletID.value) {
+      return
+    }
+    // don't process key presses if focused on title
+    if (e.srcElement.classList.contains('page__title')) {
+      return
+    }
+
+    e.preventDefault()
+    // enter to activate edit mode
+    if (e.keyCode === 13) {
+      const bulletID = bullets.value[0].id
+      focus(bulletElement.value.CompleteBulletElements[bulletID])
+      page.setEditModeBulletID(bulletID)
+      return
+    }
+
+    // b to go back to nav
+    if (e.keyCode === 66) {
+      router.push({ name: 'Nav'})
     }
   }
 
@@ -103,9 +147,14 @@
   }
 
   async function removeBullet(payload) {
+    // if it is the last bullet on the page don't remove it
+    if ((bullets.value.length === 1) & (bullets.value[0].bullets.length === 0)) {
+      return
+    }
+
     const previousBulletID = await bullet.remove(currentPage.value.id, payload.bulletIDs)
     if (previousBulletID === 'title') {
-      title.value.focus()
+      moveUpToTitle()
     } else {
       const previousBullet = bulletElement.value.CompleteBulletElements[previousBulletID]
       focus(previousBullet)
@@ -115,6 +164,7 @@
   function moveUpToTitle() {
     title.value.focus()
     page.setEditModeBulletID(null)
+    setCaretToEnd(title.value)
   }
 
   function moveUpToPreviousBullet(payload) {

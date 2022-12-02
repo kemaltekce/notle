@@ -59,7 +59,7 @@
 
   function activateEditable(e, bulletID) {
     if (e.target.classList.contains('bullet__text')) {
-      focus(e.target)
+      focus(e.target, false)
       page.setEditModeBulletID(bulletID)
     }
   }
@@ -130,8 +130,11 @@
     emit('updateText', {bulletIDs: [bulletID, ...payload.bulletIDs], text: payload.text})
   }
 
-  function toggleBullet(bulletID, toggled) {
-    emit('changeToggle', {bulletIDs: [bulletID], toggled: !toggled})
+  function toggleBullet(bullet) {
+    // only toggle bullet if bullet has toggle-able bullets
+    if (bullet.bullets.length > 0) {
+      emit('changeToggle', {bulletIDs: [bullet.id], toggled: !bullet.toggled})
+    }
   }
 
   function changeToggle(payload, bulletID) {
@@ -220,6 +223,7 @@
     // if bullet style is simple text and the bullet text is empty remove the
     // bullet
     if ((bulletStyle === 'text') & (e.target.innerText.length === 0)) {
+      e.preventDefault()
       emit('removeBullet', {bulletIDs: [bulletID]})
       return
     }
@@ -294,17 +298,17 @@
             @focus="activateEditMode(element.id)"
             @blur="deactivateEditable($event, element.id)"
             @keydown.enter.exact.prevent="addNewBullet(element.id)"
-            @keydown.meta.enter.prevent="toggleBullet(element.id, element.toggled)"
+            @keydown.meta.enter.prevent="toggleBullet(element)"
             @keydown.tab.exact.prevent="indentBullet($event, element.id)"
             @keydown.shift.tab.exact.prevent="unindentBullet($event, element.id)"
             @keydown.delete.exact="remove($event, element.id, element.style)"
-            @keydown.up.exact="moveUp($event, element.id)"
-            @keydown.down.exact="moveDown($event, element.id)"
+            @keydown.up.exact.prevent="moveUp($event, element.id)"
+            @keydown.down.exact.prevent="moveDown($event, element.id)"
             >{{ element.text }}</div>
           <div
             class="toggle"
             v-if="element.bullets.length > 0"
-            @click="toggleBullet(element.id, element.toggled)"
+            @click="toggleBullet(element)"
           >
             <div v-if="element.toggled">&#8211;</div>
             <div v-else>&#x203A;</div>

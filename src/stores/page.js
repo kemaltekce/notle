@@ -6,11 +6,11 @@ import bullet from "./bullet"
 
 // state
 const pages = reactive([
-  {id: '22f2', title: 'daily log.'},
-  {id: '33d2', title: 'weekly log.'},
-  {id: '44d2', title: 'monthly log.'},
-  {id: '55d2', title: 'archive.'},
-  {id: '66d2', title: 'journal.'},
+  // {id: '22f2', title: 'daily log.'},
+  // {id: '33d2', title: 'weekly log.'},
+  // {id: '44d2', title: 'monthly log.'},
+  // {id: '55d2', title: 'archive.'},
+  // {id: '66d2', title: 'journal.'},
 ])
 
 const currentPageID = ref(null)
@@ -43,7 +43,7 @@ function move(from, to) {
 }
 
 function add() {
-  const newPage = {'id': uuid(), title: 'heyy.'}
+  const newPage = {'id': uuid(), title: 'new journal.'}
   pages.push(newPage)
   bullet.addNewPage(newPage.id)
 }
