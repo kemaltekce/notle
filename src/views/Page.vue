@@ -24,6 +24,11 @@
 
   let bullets = computed({
     get() {
+        // return empty array if page doesn't exist.
+        // code will route to 404 in next steps
+        if (!currentPage.value.id) {
+          return []
+        }
         return JSON.parse(
           JSON.stringify(bullet.getPageBullets(currentPage.value.id)))
     },
@@ -192,7 +197,7 @@
       <router-link :to="{ name: 'Nav' }">notle.</router-link>
     </div>
     <div class="menu__items">
-      <div class="menu__items__item">set</div>
+      <div class="menu__items__item">focus</div>
       <div class="menu__items__item">pro</div>
     </div>
   </div>

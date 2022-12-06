@@ -1,13 +1,14 @@
 <script setup>
   import { useRouter } from "vue-router";
   import Semicolon from '../components/Semicolon.vue'
+  import { onBeforeMount } from "vue"
 
+
+  onBeforeMount(() => {
+    document.body.className = 'hello'
+  })
 
   const router = useRouter()
-
-  function goBack() {
-    router.go(-2)
-  }
 
   function goNav() {
     router.push({name: 'Nav'})
@@ -20,9 +21,6 @@
     <div class="subtitle">
       <div>
         <p>page not found.</p>
-      </div>
-      <div>
-        <a @click="goBack">go back</a>
       </div>
       <div>
         <a @click="goNav">go to nav</a>

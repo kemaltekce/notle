@@ -29,10 +29,12 @@
   // styles
   const theme = {
     titleFontWeight: 300,  // 300, 900
-    pageFontWeight: 200,  // 200, 600
+    pageFontWeight: 200,  // 200, 400
     modalColor: '#F7F7F7',  // #F7F7F7 #C9D8D8 #E5D7FA
     displayHeyyTitle: true,
     name: '',
+    letterSpacing: '0rem', // 0, 0.5rem
+    textTransform: 'none' // none, uppercase
   }
 
 
@@ -575,6 +577,8 @@
     /* disable long touch dialog window on ios */
     user-select: none;
     -webkit-user-select: none !important;
+    text-transform: v-bind('theme.textTransform');
+    letter-spacing: v-bind('theme.letterSpacing');
   }
 
   .nav__page__delete {
