@@ -1,11 +1,15 @@
 <script setup>
-  import { ref, inject, onBeforeMount, onBeforeUpdate } from 'vue'
+  import { ref, inject, onBeforeMount, onBeforeUpdate, onMounted } from 'vue'
   import { onBeforeRouteLeave, useRouter } from 'vue-router'
   import _ from 'lodash'
+
+  import setRootColor from '../utils/setRootColor'
+  import setFont from '../utils/setFont'
 
 
   const router = useRouter()
   const page = inject('page')
+  const setting = inject('setting')
 
   const currentPageID = page.currentPageID
   const hoveringPageID = ref(null)
@@ -27,15 +31,7 @@
   const touchDuration = 1000;
   const longTouch = ref(false)
   // styles
-  const theme = {
-    titleFontWeight: 300,  // 300, 900
-    pageFontWeight: 200,  // 200, 400
-    modalColor: '#F7F7F7',  // #F7F7F7 #C9D8D8 #E5D7FA
-    displayHeyyTitle: true,
-    name: '',
-    letterSpacing: '0rem', // 0, 0.5rem
-    textTransform: 'none' // none, uppercase
-  }
+  const theme = setting.theme.value
 
 
   if (currentPageID.value) {
@@ -48,6 +44,11 @@
     document.addEventListener('keydown', navigate)
     document.addEventListener('mousemove', activateMouse)
     document.addEventListener('touchstart', removeHoveringByTouch)
+  })
+
+  onMounted(() => {
+    setRootColor(theme.mainColor)
+    setFont(theme.fontFamily)
   })
 
   onBeforeUpdate(() => {
@@ -598,11 +599,11 @@
   }
 
   .nav__page__link--active {
-    background-color: #d1d1d180;
+    background-color: v-bind('theme.secondColor');
   }
 
   .nav__page--hovering {
-    background-color: #d1d1d180;
+    background-color: v-bind('theme.secondColor');
   }
 
   .button {
@@ -616,7 +617,7 @@
   }
 
   .button--hovering {
-    background-color: #d1d1d180;
+    background-color: v-bind('theme.secondColor');
   }
 
   .modal {
@@ -624,7 +625,7 @@
   }
 
   .modal__background {
-    background-color: #d1d1d180;
+    background-color: v-bind('theme.secondColor');
     bottom: 0;
     left: 0;
     position: fixed;
@@ -645,7 +646,7 @@
     max-height: 50%;
     overflow: auto;
     z-index: 20;
-    background-color: v-bind('theme.modalColor');
+    background-color: v-bind('theme.mainColor');
   }
 
   @keyframes scrollIn {
@@ -690,11 +691,11 @@
     font-size: 1rem;
     font-weight: 200;
     color:#555555;
-    background-color: v-bind('theme.modalColor');
+    background-color: v-bind('theme.mainColor');
   }
 
   .modal__content__buttons__button:hover {
-    background-color: #d1d1d180;
+    background-color: v-bind('theme.secondColor');
   }
 
   @media screen and (max-width: 400px) {
@@ -732,7 +733,7 @@
     font-size: 1.3rem;
     font-weight: 200;
     padding: 0.7rem 1rem;
-    border-bottom: 1px solid v-bind('theme.modalColor');
+    border-bottom: 1px solid v-bind('theme.mainColor');
   }
 
   .modal__content__options__option span {
@@ -748,7 +749,7 @@
     /* padding: 0.5rem 0rem; */
     position: fixed;
     width: 100%;
-    background-color: #F7F7F7;
+    background-color: v-bind('theme.mainColor');
     z-index: 5;
   }
 

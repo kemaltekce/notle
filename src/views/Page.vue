@@ -7,6 +7,8 @@
   import focus from "../utils/focus"
   import blur from "../utils/blur"
   import setCaretToEnd from "../utils/setCaretToEnd"
+  import setRootColor from '../utils/setRootColor'
+  import setFont from '../utils/setFont'
 
 
   const props = defineProps({
@@ -15,11 +17,21 @@
   const router = useRouter()
   const page = inject('page')
   const bullet = inject('bullet')
+  const setting = inject('setting')
+
   const bulletElement = ref(null)
   const title = ref(null)
+  // styles
+  const theme = setting.theme.value
 
   let currentPage = computed(() => {
     return page.getById(props.id)
+  })
+  let menuTitle = computed(() => {
+    if (setting.name.value) {
+      return 'heyy ' + setting.name.value + '.'
+    }
+    return 'heyy.'
   })
 
   let bullets = computed({
@@ -49,6 +61,8 @@
   onMounted(() => {
     toNotFoundIfMissingPage(currentPage.value)
     page.setCurruntPageID(currentPage.value.id)
+    setRootColor(theme.mainColor)
+    setFont(theme.fontFamily)
     document.addEventListener('mousedown', deactivateEditMode)
     document.addEventListener('keydown', processKeyPress)
   })
@@ -191,11 +205,11 @@
 <template>
   <div class="menu">
     <div class="menu__title">
-      <router-link :to="{ name: 'Nav' }">heyy.</router-link>
+      <router-link :to="{ name: 'Nav' }">{{ menuTitle }}</router-link>
     </div>
-    <div class="menu__title">
+    <!-- <div class="menu__title">
       <router-link :to="{ name: 'Nav' }">notle.</router-link>
-    </div>
+    </div> -->
     <div class="menu__items">
       <div class="menu__items__item">focus</div>
       <div class="menu__items__item">pro</div>
@@ -244,7 +258,7 @@
   .page__title {
     font-size: 3.5rem;
     padding: 3rem 0;
-    font-weight: 300;
+    font-weight: v-bind('theme.titleFontWeight');
     outline: none;
   }
 
@@ -257,7 +271,7 @@
     /* padding: 0.5rem 0rem; */
     position: fixed;
     width: 100%;
-    background-color: #F7F7F7;
+    background-color: v-bind('theme.mainColor');
     z-index: 5;
   }
 
