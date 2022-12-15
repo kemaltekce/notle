@@ -29,8 +29,14 @@ const titleOptions = {
 }
 
 const fontOptions = {
-  'default': {fontFamily: 'Inter'},
-  'mono': {fontFamily: 'Roboto Mono'},
+  'default': {fontFamily: 'Inter', fontSize: '16px'},
+  'mono': {fontFamily: 'Roboto Mono', fontSize: '15.5px'},
+}
+
+const designOptions = {
+  'simple': {design: 'simple'},
+  'retro': {design: 'retro'},
+  'card': {design: 'card'},
 }
 
 
@@ -40,6 +46,7 @@ const style = ref('light')
 const color = ref('grey')
 const title = ref('yes')
 const font = ref('default')
+const design = ref('simple')
 
 let theme = computed(() => {
   return {
@@ -47,6 +54,7 @@ let theme = computed(() => {
     ...colorOptions[color.value],
     ...titleOptions[title.value],
     ...fontOptions[font.value],
+    ...designOptions[design.value],
     name: name.value,
   }
 })
@@ -76,6 +84,10 @@ function setFont(newFont) {
   font.value = newFont
 }
 
+function setDesign(newDesign) {
+  design.value = newDesign
+}
+
 export default {
   theme: readonly(theme),
   name: readonly(name),
@@ -83,13 +95,16 @@ export default {
   color: readonly(color),
   title: readonly(title),
   font: readonly(font),
+  design: readonly(design),
   styleOptions: readonly(styleOptions),
   titleOptions: readonly(titleOptions),
   colorOptions: readonly(colorOptions),
   fontOptions: readonly(fontOptions),
+  designOptions: readonly(designOptions),
   setColor,
   setName,
   setStyle,
   setTitle,
   setFont,
+  setDesign,
 }

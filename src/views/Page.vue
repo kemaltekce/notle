@@ -62,7 +62,7 @@
     toNotFoundIfMissingPage(currentPage.value)
     page.setCurruntPageID(currentPage.value.id)
     setRootColor(theme.mainColor)
-    setFont(theme.fontFamily)
+    setFont(theme.fontFamily, theme.fontSize)
     document.addEventListener('mousedown', deactivateEditMode)
     document.addEventListener('keydown', processKeyPress)
   })
@@ -203,7 +203,12 @@
 </script>
 
 <template>
-  <div class="menu">
+  <div
+    class="menu"
+    :class='{
+      "menu--simple": setting.theme.value.design === "simple",
+    }'
+  >
     <div class="menu__title">
       <router-link :to="{ name: 'Nav' }">{{ menuTitle }}</router-link>
     </div>
@@ -211,12 +216,27 @@
       <router-link :to="{ name: 'Nav' }">notle.</router-link>
     </div> -->
     <div class="menu__items">
-      <div class="menu__items__item">focus</div>
-      <div class="menu__items__item">pro</div>
+      <div
+        class="menu__items__item"
+        :class='{
+          "menu__items__item--simple": setting.theme.value.design === "simple",
+        }'
+      >focus</div>
+      <div
+        class="menu__items__item"
+        :class='{
+          "menu__items__item--simple": setting.theme.value.design === "simple",
+        }'
+      >pro</div>
     </div>
   </div>
-  <div class="page" oncontextmenu="return false">
-    <div class="empty"></div>
+  <div
+    class="page"
+    :class='{
+      "page--simple": setting.theme.value.design === "simple"
+    }'
+    oncontextmenu="return false"
+  >
     <div
       class="page__title" contenteditable="true" ref="title"
       @blur="updatePageTitle"
@@ -248,16 +268,19 @@
   .page {
     max-width: 600px;
     margin: 0rem auto;
-    padding: 0rem 2rem;
-    border-left: 1px solid #555555;
-    border-right: 1px solid #555555;
     min-height: 100%;
     overflow: hidden;
   }
 
+  .page--simple {
+    padding: 1rem 2rem 0rem 2rem;
+    border-left: 1px solid #555555;
+    border-right: 1px solid #555555;
+  }
+
   .page__title {
-    font-size: 3.5rem;
-    padding: 3rem 0;
+    font-size: 3rem;
+    padding: 6rem 0 1rem 0;
     font-weight: v-bind('theme.titleFontWeight');
     outline: none;
   }
@@ -266,13 +289,16 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    border-bottom: 1px solid #555555;
     margin: 0rem -1rem;
     /* padding: 0.5rem 0rem; */
     position: fixed;
     width: 100%;
     background-color: v-bind('theme.mainColor');
     z-index: 5;
+  }
+
+  .menu--simple {
+    border-bottom: 1px solid #555555;
   }
 
   .menu__title {
@@ -285,8 +311,11 @@
   }
 
   .menu__items__item {
-    border-left: 1px solid #555555;
     padding: 0.5rem 1rem;
     cursor: pointer;
+  }
+
+  .menu__items__item--simple {
+    border-left: 1px solid #555555;
   }
 </style>

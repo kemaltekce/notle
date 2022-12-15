@@ -18,6 +18,8 @@
   // listeners because the bullet component can be mounted multiple times to the
   // dom.
   const page = inject('page')
+  const setting = inject('setting')
+
   const emit = defineEmits([
     'customChange', 'updateText', 'changeToggle', 'addNewBulletToPage',
     'indentBulletToSibling', 'unindentBulletToParent', 'removeBulletStyle',
@@ -98,6 +100,8 @@
 
     persistentClone.value.remove();
     persistentClone.value = null;
+
+    e.item.style.removeProperty('width')
 
     if (clonesNextSibling.value) {
       clonesNextSibling.value.classList.remove('sibling')
@@ -284,7 +288,13 @@
     <template #item="{ element }">
       <div
         class="bullet"
-        :class='{"bullet--bottom": main, "bullet--crossed": bulletStyle[element.style].crossed}'>
+        :class='{
+          "bullet--simple": main && (setting.theme.value.design === "simple"),
+          "bullet--retro": main && (setting.theme.value.design === "retro"),
+          "bullet--card": main && (setting.theme.value.design === "card"),
+          "bullet--crossed": bulletStyle[element.style].crossed
+        }'
+      >
         <div class="bullet__main">
           <div
             class="bullet__type"
@@ -348,9 +358,25 @@
     font-weight: 400;
   }
 
-  .bullet--bottom {
+  .bullet--simple {
     border-bottom: 1px solid #55555550;
     padding: 0.7rem 0rem;
+  }
+
+  .bullet--retro {
+    border: 1px solid #555555;
+    margin: 1rem 0rem;
+    border-radius: 0.5rem;
+    padding: 1rem 0.7rem;
+    box-shadow: 0 0.3rem #555555;
+  }
+
+  .bullet--card {
+    margin: 1rem 0rem;
+    border-radius: 0.5rem;
+    padding: 1rem 0.7rem;
+    /* box-shadow: 0 0 0.4rem -0.2rem #555555; */
+    background-color: #fefefe;
   }
 
   .bullet--crossed {
@@ -423,6 +449,7 @@
   .sortable-ghost {
     background-color: #555555 !important;
     overflow: hidden;
+    box-shadow: none;
   }
 
   .bullet--placeholder {

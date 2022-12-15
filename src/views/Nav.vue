@@ -32,6 +32,7 @@
   const longTouch = ref(false)
   // styles
   const theme = setting.theme.value
+  const designClass = theme.design
 
 
   if (currentPageID.value) {
@@ -48,7 +49,7 @@
 
   onMounted(() => {
     setRootColor(theme.mainColor)
-    setFont(theme.fontFamily)
+    setFont(theme.fontFamily, theme.fontSize)
   })
 
   onBeforeUpdate(() => {
@@ -443,21 +444,38 @@
 </script>
 
 <template>
-  <div class="menu">
+  <div
+    class="menu"
+    :class='{
+      "menu--simple": designClass === "simple",
+    }'
+  >
     <div class="menu__title">notle.</div>
     <div class="menu__items">
-      <div class="menu__items__item">
+      <div
+        class="menu__items__item"
+        :class='{
+          "menu__items__item--simple": designClass === "simple",
+        }'
+      >
         <router-link :to="{ name: 'Settings' }">set</router-link>
       </div>
       <div
         class="menu__items__item"
+        :class='{
+          "menu__items__item--simple": designClass === "simple",
+        }'
         @click="displayModal = getModalProTipsData()">pro</div>
     </div>
   </div>
   <div
-    class="nav" :class='{"nav--mouse-inactive": keyActive}'
+    class="nav"
+    :class='{
+      "nav--mouse-inactive": keyActive,
+      "nav--simple": designClass === "simple"
+    }'
     oncontextmenu="return false">
-    <div class="empty"></div>
+    <div class="empty" v-if="!theme.displayHeyyTitle"></div>
     <div class="nav__title" v-if="theme.displayHeyyTitle">
       <div class="nav__title__name" v-if="theme.name">{{ theme.name }}</div>
       heyy.</div>
@@ -469,11 +487,20 @@
       @touchstart="touchStart(page.id)"
       @touchmove="touchMove($event, page.id)"
       @touchend="touchEnd(page.id)"
-      :class='{"nav__page--hovering": hoveringPageID === page.id}'
+      :class='{
+        "nav__page--hovering": hoveringPageID === page.id,
+        "nav__page--simple": designClass === "simple",
+        "nav__page--retro": designClass === "retro",
+        "nav__page--card": designClass === "card",
+        }
+      '
       >
       <router-link class="nav__page__link"
         :to="{ name: 'Page', params: { id: page.id} }"
-        :class='{"nav__page__link--active": currentPageID === page.id}'>
+        :class='{
+          "nav__page__link--active": (currentPageID === page.id) & (designClass === "simple")
+        }'
+      >
           {{ page.title }}
       </router-link>
       <div
@@ -544,10 +571,13 @@
   .nav {
     max-width: 600px;
     margin: 0rem auto;
-    padding: 0rem 2rem;
+    min-height: 100%;
+  }
+
+  .nav--simple {
+    padding: 1rem 2rem 0rem 2rem;
     border-left: 1px solid #555555;
     border-right: 1px solid #555555;
-    min-height: 100%;
   }
 
   .nav--mouse-inactive {
@@ -555,8 +585,8 @@
   }
 
   .nav__title {
-    font-size: 3.5rem;
-    padding: 3rem 0;
+    font-size: 3rem;
+    padding: 6rem 0 1rem 0;
     font-weight: v-bind('theme.titleFontWeight');
   }
 
@@ -569,7 +599,6 @@
   .nav__page {
     display: flex;
     font-size: 1.5rem;
-    border-bottom: 1px solid #555555;
     outline: none;
     position: relative;
     font-weight: v-bind('theme.pageFontWeight');
@@ -580,6 +609,26 @@
     -webkit-user-select: none !important;
     text-transform: v-bind('theme.textTransform');
     letter-spacing: v-bind('theme.letterSpacing');
+  }
+
+  .nav__page--simple {
+    border-bottom: 1px solid #555555;
+  }
+
+  .nav__page--retro {
+    border: 1px solid #555555;
+    margin: 1rem 0rem;
+    border-radius: 0.5rem;
+    padding: 0 0.5rem;
+    box-shadow: 0 0.3rem #555555;
+  }
+
+  .nav__page--card {
+    margin: 1rem 0rem;
+    border-radius: 0.5rem;
+    padding: 0.2rem 0.5rem;
+    /* box-shadow: 0 0 0.4rem -0.2rem #555555; */
+    background-color: #fefefe;
   }
 
   .nav__page__delete {
@@ -744,13 +793,22 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    border-bottom: 1px solid #555555;
     margin: 0rem -1rem;
     /* padding: 0.5rem 0rem; */
     position: fixed;
     width: 100%;
     background-color: v-bind('theme.mainColor');
     z-index: 5;
+  }
+
+  .menu--simple {
+    border-bottom: 1px solid #555555;
+  }
+
+  .menu--card {
+    box-shadow: 0 0 0.4rem -0.2rem #555555;
+    background-color: #fefefe;
+    padding: 0.5rem 0;
   }
 
   .menu__title {
@@ -763,9 +821,11 @@
   }
 
   .menu__items__item {
-    border-left: 1px solid #555555;
     padding: 0.5rem 1rem;
     cursor: pointer;
   }
 
+  .menu__items__item--simple {
+    border-left: 1px solid #555555;
+  }
 </style>

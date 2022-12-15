@@ -5,16 +5,17 @@ import setRootColor from "../utils/setRootColor"
 import setFont from "../utils/setFont"
 
 const setting = inject('setting')
+const designClass = setting.theme.value.design
 
 
 onUpdated(() => {
   setRootColor(setting.theme.value.mainColor)
-  setFont(setting.theme.value.fontFamily)
+  setFont(setting.theme.value.fontFamily, setting.theme.value.fontSize)
 })
 
 onMounted(() => {
   setRootColor(setting.theme.value.mainColor)
-  setFont(setting.theme.value.fontFamily)
+  setFont(setting.theme.value.fontFamily, setting.theme.value.fontSize)
 })
 
 
@@ -45,10 +46,19 @@ function updateTitle(newTitle) {
 function updateFont(newFont) {
   setting.setFont(newFont)
 }
+
+function updateDesign(newDesign) {
+  setting.setDesign(newDesign)
+}
 </script>
 
 <template>
-  <div class="menu">
+  <div
+    class="menu"
+    :class='{
+      "menu--simple": setting.theme.value.design === "simple",
+    }'
+  >
     <div class="menu__title">
       <router-link :to="{ name: 'Nav' }">notle.</router-link>
     </div>
@@ -56,10 +66,22 @@ function updateFont(newFont) {
       <router-link :to="{ name: 'Nav' }">back.</router-link>
     </div>
   </div>
-  <div class="settings" oncontextmenu="return false">
-    <div class="empty"></div>
+  <div
+    class="settings"
+    :class='{
+      "settings--simple": setting.theme.value.design === "simple"
+    }'
+    oncontextmenu="return false"
+  >
     <div class="settings__title">settings.</div>
-    <div class="settings__options">
+    <div
+      class="settings__options"
+      :class='{
+        "settings__options--simple": setting.theme.value.design === "simple",
+        "settings__options--retro": setting.theme.value.design === "retro",
+        "settings__options--card": setting.theme.value.design === "card",
+        }'
+    >
       <div class="settings__options__text">
         <div class="settings__options__name">name</div>
         <div class="settings__options__setting">
@@ -71,7 +93,13 @@ function updateFont(newFont) {
             >{{ setting.name.value }}</div>
         </div>
       </div>
-      <div class="settings__options__switch">
+      <div
+        class="settings__options__switch"
+        :class='{
+          "settings__options__switch--retro": setting.theme.value.design === "retro",
+          "settings__options__switch--card": setting.theme.value.design === "card",
+        }'
+      >
         <div class="settings__options__name">style</div>
         <div class="settings__options__setting">
           <div
@@ -91,7 +119,13 @@ function updateFont(newFont) {
             >{{ key }}</div>
         </div>
       </div>
-      <div class="settings__options__switch">
+      <div
+        class="settings__options__switch"
+        :class='{
+          "settings__options__switch--retro": setting.theme.value.design === "retro",
+          "settings__options__switch--card": setting.theme.value.design === "card",
+        }'
+      >
         <div class="settings__options__name">heyy title</div>
         <div class="settings__options__setting">
           <div
@@ -111,7 +145,18 @@ function updateFont(newFont) {
             >{{ key }}</div>
         </div>
       </div>
+      <div class="settings__options__select">
+        <div class="settings__options__name">design</div>
+        <div class="settings__options__setting">
+          <div
+            v-for="(value, key) in setting.designOptions" :key="key"
+            :class='{"settings__options__select--active": key === setting.design.value}'
+            @click="updateDesign(key)"
+            >{{ key }}</div>
+        </div>
+      </div>
     </div>
+    <div class="empty"></div>
   </div>
 
 </template>
@@ -120,16 +165,19 @@ function updateFont(newFont) {
   .settings {
     max-width: 600px;
     margin: 0rem auto;
-    padding: 0rem 2rem;
-    border-left: 1px solid #555555;
-    border-right: 1px solid #555555;
     min-height: 100%;
     overflow: hidden;
   }
 
+  .settings--simple {
+    padding: 1rem 2rem 0rem 2rem;
+    border-left: 1px solid #555555;
+    border-right: 1px solid #555555;
+  }
+
   .settings__title {
-    font-size: 3.5rem;
-    padding: 3rem 0;
+    font-size: 3rem;
+    padding: 6rem 0 3rem 0;
     font-weight: v-bind('setting.theme.value.titleFontWeight');
     outline: none;
   }
@@ -138,9 +186,25 @@ function updateFont(newFont) {
     border-top: 2px solid #555555;
   }
 
-  .settings__options > div {
+  .settings__options--simple > div {
     border-bottom: 1px solid #555555;
     padding: 1rem 0;
+  }
+
+  .settings__options--retro > div {
+    border: 1px solid #555555;
+    margin: 1rem 0rem;
+    border-radius: 0.5rem;
+    padding: 1rem 1rem;
+    box-shadow: 0 0.3rem #555555;
+  }
+
+  .settings__options--card > div {
+    margin: 1rem 0rem;
+    border-radius: 0.5rem;
+    padding: 1rem 1rem;
+    /* box-shadow: 0 0 0.4rem -0.2rem #555555; */
+    background-color: #fefefe;
   }
 
   .settings__options__name {
@@ -182,6 +246,20 @@ function updateFont(newFont) {
     padding: 0.2rem 1rem;
   }
 
+  .settings__options__switch--retro .settings__options__setting div{
+    border: 1px solid #555555;
+    padding: 0.2rem 1rem;
+    border-radius: 0.3rem;
+    margin: 0 0.2rem;
+  }
+
+  .settings__options__switch--card .settings__options__setting div{
+    border: 1px solid #555555;
+    padding: 0.2rem 1rem;
+    border-radius: 0.3rem;
+    margin: 0 0.2rem;
+  }
+
   .settings__options__text__input {
     outline: none;
     min-width: 1px;
@@ -197,13 +275,22 @@ function updateFont(newFont) {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    border-bottom: 1px solid #555555;
     margin: 0rem -1rem;
     /* padding: 0.5rem 0rem; */
     position: fixed;
     width: 100%;
     background-color: v-bind('setting.theme.value.mainColor');
     z-index: 5;
+  }
+
+  .menu--simple {
+    border-bottom: 1px solid #555555;
+  }
+
+  .menu--card {
+    box-shadow: 0 0 0.4rem -0.2rem #555555;
+    background-color: #fefefe;
+    padding: 0.5rem 0;
   }
 
   .menu__title {
