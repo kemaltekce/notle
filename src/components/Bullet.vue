@@ -24,7 +24,7 @@
     'customChange', 'updateText', 'changeToggle', 'addNewBulletToPage',
     'indentBulletToSibling', 'unindentBulletToParent', 'removeBulletStyle',
     'removeBullet', 'moveUpToPreviousBullet', 'moveDownToNextBullet',
-    'moveUpToTitle'])
+    'moveUpToTitle', 'toggleFocusMode'])
 
   const persistentClone = ref(null)
   const clonesNextSibling = ref(null)
@@ -264,6 +264,10 @@
   function moveDownToNextBullet(payload, bulletID) {
     emit('moveDownToNextBullet', {bulletIDs: [bulletID, ...payload.bulletIDs]})
   }
+
+  function toggleFocusMode(payload) {
+    emit('toggleFocusMode', {bulletID: payload.bulletID})
+  }
 </script>
 
 <template>
@@ -314,6 +318,7 @@
             @keydown.delete.exact="remove($event, element.id, element.style)"
             @keydown.up.exact.prevent="moveUp($event, element.id)"
             @keydown.down.exact.prevent="moveDown($event, element.id)"
+            @keydown.meta.u.exact="toggleFocusMode({'bulletID': element.id})"
             >{{ element.text }}</div>
           <div
             class="toggle"
@@ -339,6 +344,7 @@
             @removeBullet="removeBullet($event, element.id)"
             @moveUpToPreviousBullet="moveUpToPreviousBullet($event, element.id)"
             @moveDownToNextBullet="moveDownToNextBullet($event, element.id)"
+            @toggleFocusMode="toggleFocusMode($event)"
             />
         </div>
       <cmdbar v-if="page.editModeBulletID.value === element.id" @runCmd="runCmd($event, element.id)"/>
@@ -364,18 +370,18 @@
   }
 
   .bullet--retro {
-    border: 1px solid #555555;
+    border: 1px solid currentColor;
     margin: 1rem 0rem;
     border-radius: 0.5rem;
     padding: 1rem 0.7rem;
-    box-shadow: 0 0.3rem #555555;
+    box-shadow: 0 0.3rem currentColor;
   }
 
   .bullet--card {
     margin: 1rem 0rem;
     border-radius: 0.5rem;
     padding: 1rem 0.7rem;
-    /* box-shadow: 0 0 0.4rem -0.2rem #555555; */
+    /* box-shadow: 0 0 0.4rem -0.2rem currentColor; */
     background-color: #fefefe;
   }
 
