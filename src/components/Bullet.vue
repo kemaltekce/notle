@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, defineExpose, computed, onUpdated, inject} from "vue"
+  import { ref, defineExpose, computed, onUpdated, inject, nextTick} from "vue"
   import _ from 'lodash'
   import draggable from "vuedraggable";
 
@@ -72,6 +72,10 @@
 
   function deactivateEditable(e, bulletID) {
     e.target.setAttribute("contenteditable", false)
+    emit('updateText', {bulletIDs: [bulletID], text: e.target.innerText})
+  }
+
+  function triggerUpdate(e, bulletID) {
     emit('updateText', {bulletIDs: [bulletID], text: e.target.innerText})
   }
 
@@ -188,7 +192,7 @@
     emit('unindentBulletToParent', {bulletIDs: [bulletID, ...payload.bulletIDs]})
   }
 
-  function runCmd(payload, bulletID) {
+  async function runCmd(payload, bulletID) {
     if (payload.name === 'indent') {
       const bulletIndex = _.findIndex(props.bullets, {'id': bulletID})
       // if bullet can not be indented, do nothing. Bullet is frist bullet in
@@ -210,6 +214,17 @@
       }
       unindentBullet(null, bulletID)
     }
+    else if (payload.name === 'bold') {
+        if (RegExp("^#\\s").test(CompleteBulletElements.value[bulletID].innerText)) {
+          emit('updateText', {bulletIDs: [bulletID], text: CompleteBulletElements.value[bulletID].innerText.substring(2)})
+        } else (
+          emit('updateText', {bulletIDs: [bulletID], text: '# ' + CompleteBulletElements.value[bulletID].innerText})
+        )
+        await nextTick()
+        focus(CompleteBulletElements.value[bulletID])
+
+    }
+
   }
 
   function remove(e, bulletID, bulletStyle) {
@@ -306,11 +321,16 @@
             v-html="bulletStyle[element.style].icon"></div>
           <div
             class="bullet__text"
-            :class='{"bullet__text--done": bulletStyle[element.style].crossed}'
+            :class='{
+              "bullet__text--done": bulletStyle[element.style].crossed,
+              "bullet__text--bold": RegExp("^#\\s").test(element.text),
+            }'
             :ref="(el) => (bulletElements[element.id] = el)"
             @click="activateEditable($event, element.id)"
             @focus="activateEditMode(element.id)"
             @blur="deactivateEditable($event, element.id)"
+            @keyup.space="triggerUpdate($event, element.id)"
+            @keyup.delete="triggerUpdate($event, element.id)"
             @keydown.enter.exact.prevent="addNewBullet(element.id)"
             @keydown.meta.enter.prevent="toggleBullet(element)"
             @keydown.tab.exact.prevent="indentBullet($event, element.id)"
@@ -328,6 +348,7 @@
             <div v-if="element.toggled">&#8211;</div>
             <div v-else>&#x203A;</div>
           </div>
+        <cmdbar v-if="page.editModeBulletID.value === element.id" @runCmd="runCmd($event, element.id)"/>
         </div>
         <div class="bullet__toggle" v-if="element.toggled">
           <bullet
@@ -347,7 +368,6 @@
             @toggleFocusMode="toggleFocusMode($event)"
             />
         </div>
-      <cmdbar v-if="page.editModeBulletID.value === element.id" @runCmd="runCmd($event, element.id)"/>
       </div>
     </template>
   </draggable>
@@ -411,6 +431,11 @@
 
   .bullet__text--done:not(:empty) {
     text-decoration: line-through;
+  }
+
+  .bullet__text--bold {
+    font-size: 1.6rem;
+    font-weight: 600;
   }
 
   .bullet__type {

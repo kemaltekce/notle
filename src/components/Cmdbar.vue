@@ -1,5 +1,5 @@
 <script setup>
-  import { defineExpose } from "vue"
+  import { defineExpose, ref, onMounted } from "vue"
 
 
   const emit = defineEmits(['runCmd'])
@@ -7,19 +7,38 @@
   const cmds = [
     {'name': 'indent', 'icon': '&#x22A2'},
     {'name': 'unindent', 'icon': '&#x22A3'},
+    {'name': 'bold', 'icon': '#'}
   ]
+
+  const cmdbar = ref(null)
 
   function runCmd(name) {
     emit('runCmd', {name})
   }
+
+  // the position of the cmdbar is supposed to be fixed. But fixed is not
+  // working on mobile because of the difference in visual viewports. So instead
+  // of having it being fixed, we place it in absolute with respect to the
+  // bullet. Change this if something like device-fixed gets implemented by css.
+  function detectMobile() {
+    if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+      cmdbar.value.style.position = 'absolute'
+      cmdbar.value.style.bottom = '-' + (cmdbar.value.clientHeight + 3) + 'px'
+      cmdbar.value.style.left = '20%'
+      cmdbar.value.style.width = '80%'
+    }
+  }
+
+  onMounted(() => {
+    detectMobile()
+  })
 </script>
 
 <template>
-  <div class="cmdbar">
+  <div class="cmdbar" ref="cmdbar">
     <div
       v-for="cmd in cmds" :key="cmd.name"
       class="cmd"
-      @click="runCmd(cmd.name)"
       >
       <div class="cmd__text"
         v-html="cmd.icon"
